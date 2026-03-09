@@ -1,0 +1,44 @@
+package com.backend.billiards_management.entities.order_detail;
+
+import com.backend.billiards_management.entities.invoice.Invoice;
+import com.backend.billiards_management.entities.product.Product;
+import jakarta.persistence.*;
+import lombok.*;
+import java.util.Date;
+
+@Entity
+@Table(name = "order_details")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class OrderDetail {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private int id;
+
+    @Column(name = "price")
+    private Double price;
+
+    @Column(name = "quantity")
+    private Integer quantity;
+
+    @Column(name = "note")
+    private String note;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "start_time")
+    private Date startTime;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "end_time")
+    private Date endTime;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "invoice_id")
+    private Invoice invoice;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;
+}
