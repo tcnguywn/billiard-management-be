@@ -14,7 +14,7 @@ import java.util.Date;
 @Builder
 public class OrderDetail {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Column(name = "price")

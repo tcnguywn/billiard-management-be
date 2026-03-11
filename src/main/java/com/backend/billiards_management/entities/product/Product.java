@@ -14,7 +14,7 @@ import lombok.*;
 public class Product {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Column(name = "name", length = 255)
@@ -33,7 +33,7 @@ public class Product {
     @JoinColumn(name = "category_id")
     private ProductCategory productCategory;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "image_id")
     private UploadImage image;
 }

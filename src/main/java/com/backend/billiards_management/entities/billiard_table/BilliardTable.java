@@ -13,7 +13,7 @@ import lombok.*;
 @Builder
 public class BilliardTable {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Column(name = "name")

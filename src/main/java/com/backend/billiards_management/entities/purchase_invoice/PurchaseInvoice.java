@@ -12,7 +12,7 @@ import java.util.Date;
 @Builder
 public class PurchaseInvoice {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Temporal(TemporalType.TIMESTAMP)

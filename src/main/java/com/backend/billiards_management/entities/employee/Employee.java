@@ -1,5 +1,7 @@
 package com.backend.billiards_management.entities.employee;
 
+import com.backend.billiards_management.entities.employee.enums.Role;
+import com.backend.billiards_management.entities.image.UploadImage;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,10 +13,10 @@ import lombok.*;
 @Builder
 public class Employee {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private int id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-    @Column(name = "keycloak_id")
+    @Column(name = "keycloak_id", unique = true, nullable = false)
     private String keycloakId;
 
     @Column(name = "full_name")
@@ -26,9 +28,14 @@ public class Employee {
     @Column(name = "phone_number")
     private String phoneNumber;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "role")
-    private String role;
+    private Role role;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "image_id")
+    private UploadImage image;
 
     @Column(name = "is_active")
-    private Boolean isActive;
+    private Boolean isActive = true;
 }

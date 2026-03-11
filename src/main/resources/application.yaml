@@ -1,3 +1,22 @@
 spring:
   application:
     name: billiard-management
+
+  #KEYCLOAK
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/billiard-management
+
+
+  #DATABASE
+  datasource:
+    url: jdbc:postgresql://localhost:5432/billiard_db
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+
+##SERVER
+server:
+  port: 9090

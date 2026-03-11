@@ -13,8 +13,8 @@ import java.util.Date;
 @Builder
 public class PriceList {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
     @Temporal(TemporalType.TIME)
     @Column(name = "start_time")

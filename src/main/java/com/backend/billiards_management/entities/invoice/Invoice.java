@@ -17,7 +17,7 @@ import java.util.Date;
 @Builder
 public class Invoice {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Temporal(TemporalType.TIMESTAMP)
@@ -31,6 +31,7 @@ public class Invoice {
     @Column(name = "status")
     private PaymentStatus status;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "payment_method")
     private PaymentMethod paymentMethod;
 

@@ -14,12 +14,13 @@ import lombok.*;
 public class ProductCategory {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Column(name = "category_name")
     private String categoryName;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "type")
     private ProductCategoryType type;
 }

@@ -14,12 +14,13 @@ import java.util.Date;
 @Builder
 public class Voucher {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Column(name = "voucher_code", unique = true)
     private String voucherCode;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "type")
     private VoucherType type;
 
