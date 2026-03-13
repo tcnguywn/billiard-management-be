@@ -19,8 +19,11 @@ public class Employee {
     @Column(name = "keycloak_id", unique = true, nullable = false)
     private String keycloakId;
 
-    @Column(name = "full_name")
-    private String fullName;
+    @Column(name = "fist_name")
+    private String fistName;
+
+    @Column(name = "last_name")
+    private String lastName;
 
     @Column(name = "email")
     private String email;

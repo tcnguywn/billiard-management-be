@@ -23,8 +23,8 @@ public class SecurityConfig {
                                         "/v3/api-docs/**",
                                         "/swagger-ui.html"
                                 ).permitAll()
-                                .requestMatchers("/manager/**").hasRole("MANAGER")
-                                .requestMatchers("/employee/**").hasAnyRole("EMPLOYEE","MANAGER")
+                                .requestMatchers("/api/v1/manager/**").permitAll()
+                                .requestMatchers("/api/v1/employees/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));

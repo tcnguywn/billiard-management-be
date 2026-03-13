@@ -5,6 +5,7 @@ import com.backend.billiards_management.dtos.request.UpdateEmployeeReq;
 import com.backend.billiards_management.dtos.response.EmployeeRes;
 import com.backend.billiards_management.entities.employee.Employee;
 import com.backend.billiards_management.repositories.EmployeeRepository;
+import com.backend.billiards_management.services.keycloak.KeycloakUserService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,8 @@ public class EmployeeService {
 
     private final ModelMapper modelMapper;
 
+    private final KeycloakUserService keycloakUserService;
+
     public EmployeeRes getEmployeeById(Integer employeeId) {
         return modelMapper.map(employeeRepository.findById(employeeId).orElse(null), EmployeeRes.class);
     }
@@ -31,7 +34,25 @@ public class EmployeeService {
     }
 
     public EmployeeRes createEmployee(CreateEmployeeReq req) {
-        Employee employee = modelMapper.map(req, Employee.class);
+
+        String keycloakId = keycloakUserService.createUser(
+                req.getUsername(),
+                req.getEmail(),
+                req.getPassword(),
+                req.getFirstName(),
+                req.getLastName()
+        );
+
+        Employee employee = Employee.builder()
+                .keycloakId(keycloakId)
+                .fistName(req.getFirstName())
+                .lastName(req.getLastName())
+                .email(req.getEmail())
+                .phoneNumber(req.getPhoneNumber())
+                .role(req.getRole())
+                .isActive(true)
+                .build();
+
         return modelMapper.map(employeeRepository.save(employee), EmployeeRes.class);
     }
 

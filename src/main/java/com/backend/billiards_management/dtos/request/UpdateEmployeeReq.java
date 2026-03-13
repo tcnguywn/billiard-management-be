@@ -6,7 +6,8 @@ import lombok.Data;
 @Data
 public class UpdateEmployeeReq {
 
-    private String fullName;
+    private String firstName;
+    private String lastName;
     private String email;
     private String phoneNumber;
 
