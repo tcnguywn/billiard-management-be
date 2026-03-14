@@ -1,5 +1,6 @@
 package com.backend.billiards_management.entities.purchase_detail;
 
+import com.backend.billiards_management.entities.BaseEntity;
 import com.backend.billiards_management.entities.product.Product;
 import com.backend.billiards_management.entities.purchase_invoice.PurchaseInvoice;
 import jakarta.persistence.*;
@@ -11,10 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PurchaseDetail {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+public class PurchaseDetail extends BaseEntity {
 
     @Column(name = "quantity")
     private Integer quantity;

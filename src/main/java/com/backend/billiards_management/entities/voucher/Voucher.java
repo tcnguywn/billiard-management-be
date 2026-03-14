@@ -1,5 +1,6 @@
 package com.backend.billiards_management.entities.voucher;
 
+import com.backend.billiards_management.entities.BaseEntity;
 import com.backend.billiards_management.entities.voucher.enums.VoucherStatus;
 import com.backend.billiards_management.entities.voucher.enums.VoucherType;
 import jakarta.persistence.*;
@@ -12,10 +13,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Voucher {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+public class Voucher extends BaseEntity {
 
     @Column(name = "voucher_code", unique = true)
     private String voucherCode;

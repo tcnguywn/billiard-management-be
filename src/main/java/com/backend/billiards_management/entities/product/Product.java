@@ -1,5 +1,6 @@
 package com.backend.billiards_management.entities.product;
 
+import com.backend.billiards_management.entities.BaseEntity;
 import com.backend.billiards_management.entities.image.UploadImage;
 import com.backend.billiards_management.entities.product_category.ProductCategory;
 import jakarta.persistence.*;
@@ -11,11 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Product {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+public class Product extends BaseEntity {
 
     @Column(name = "name", length = 255)
     private String name;

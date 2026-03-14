@@ -1,5 +1,6 @@
 package com.backend.billiards_management.entities.employee;
 
+import com.backend.billiards_management.entities.BaseEntity;
 import com.backend.billiards_management.entities.employee.enums.Role;
 import com.backend.billiards_management.entities.image.UploadImage;
 import jakarta.persistence.*;
@@ -11,10 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Employee {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+public class Employee extends BaseEntity {
 
     @Column(name = "keycloak_id", unique = true, nullable = false)
     private String keycloakId;

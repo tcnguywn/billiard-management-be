@@ -1,5 +1,6 @@
 package com.backend.billiards_management.entities.invoice;
 
+import com.backend.billiards_management.entities.BaseEntity;
 import com.backend.billiards_management.entities.billiard_table.BilliardTable;
 import com.backend.billiards_management.entities.employee.Employee;
 import com.backend.billiards_management.entities.invoice.enums.PaymentMethod;
@@ -15,10 +16,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Invoice {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+public class Invoice extends BaseEntity {
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "start_time")

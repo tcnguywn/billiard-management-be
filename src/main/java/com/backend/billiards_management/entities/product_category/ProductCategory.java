@@ -1,5 +1,6 @@
 package com.backend.billiards_management.entities.product_category;
 
+import com.backend.billiards_management.entities.BaseEntity;
 import com.backend.billiards_management.entities.product_category.enums.ProductCategoryType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -11,11 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProductCategory {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+public class ProductCategory extends BaseEntity {
 
     @Column(name = "category_name")
     private String categoryName;

@@ -1,5 +1,6 @@
 package com.backend.billiards_management.entities.price_list;
 
+import com.backend.billiards_management.entities.BaseEntity;
 import com.backend.billiards_management.entities.table_type.TableType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -11,10 +12,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PriceList {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+public class PriceList extends BaseEntity {
 
     @Temporal(TemporalType.TIME)
     @Column(name = "start_time")

@@ -32,6 +32,8 @@ public class KeycloakUserService {
         user.setEmail(email);
         user.setEnabled(true);
         user.setEmailVerified(true);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
         user.setRequiredActions(java.util.Collections.emptyList());
 
         user.setCredentials(List.of(credential));

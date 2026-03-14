@@ -1,5 +1,6 @@
 package com.backend.billiards_management.entities.billiard_table;
 
+import com.backend.billiards_management.entities.BaseEntity;
 import com.backend.billiards_management.entities.image.UploadImage;
 import com.backend.billiards_management.entities.table_type.TableType;
 import jakarta.persistence.*;
@@ -11,10 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BilliardTable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+public class BilliardTable extends BaseEntity {
 
     @Column(name = "name")
     private String name;

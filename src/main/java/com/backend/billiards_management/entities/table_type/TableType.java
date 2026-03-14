@@ -1,5 +1,6 @@
 package com.backend.billiards_management.entities.table_type;
 
+import com.backend.billiards_management.entities.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,11 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TableType {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-
+public class TableType extends BaseEntity {
     @Column(name = "type_name")
     private String typeName;
 }
