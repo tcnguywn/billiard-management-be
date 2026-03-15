@@ -4,6 +4,8 @@ import com.backend.billiards_management.entities.invoice.Invoice;
 import com.backend.billiards_management.entities.product.Product;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
@@ -17,8 +19,8 @@ public class OrderDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "price")
-    private Double price;
+    @Column(name = "price", precision = 10, scale = 2)
+    private BigDecimal price;
 
     @Column(name = "quantity")
     private Integer quantity;

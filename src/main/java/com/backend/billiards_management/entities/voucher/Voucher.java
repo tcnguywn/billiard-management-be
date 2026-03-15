@@ -5,6 +5,8 @@ import com.backend.billiards_management.entities.voucher.enums.VoucherStatus;
 import com.backend.billiards_management.entities.voucher.enums.VoucherType;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
@@ -42,6 +44,6 @@ public class Voucher extends BaseEntity {
     @Column(name = "quantity")
     private Integer quantity;
 
-    @Column(name = "minimum_amount")
-    private Double minimumAmount;
+    @Column(name = "minimum_amount", precision = 10, scale = 2)
+    private BigDecimal minimumAmount;
 }

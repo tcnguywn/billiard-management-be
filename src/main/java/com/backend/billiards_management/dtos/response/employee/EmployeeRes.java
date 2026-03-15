@@ -1,4 +1,4 @@
-package com.backend.billiards_management.dtos.response;
+package com.backend.billiards_management.dtos.response.employee;
 
 import com.backend.billiards_management.entities.employee.enums.Role;
 import lombok.AllArgsConstructor;

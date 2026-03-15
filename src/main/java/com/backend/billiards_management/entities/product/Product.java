@@ -6,6 +6,8 @@ import com.backend.billiards_management.entities.product_category.ProductCategor
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "products")
 @Data
@@ -17,11 +19,11 @@ public class Product extends BaseEntity {
     @Column(name = "name", length = 255)
     private String name;
 
-    @Column(name = "selling_price")
-    private Integer sellingPrice;
+    @Column(name = "selling_price", precision = 10, scale = 2)
+    private BigDecimal sellingPrice;
 
-    @Column(name = "import_price")
-    private Integer importPrice;
+    @Column(name = "import_price", precision = 10, scale = 2)
+    private BigDecimal importPrice;
 
     @Column(name = "stock")
     private Integer stock;

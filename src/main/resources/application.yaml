@@ -30,3 +30,10 @@ spring:
 ##SERVER
 server:
   port: 9090
+
+
+
+keycloak:
+  realm: billiard-management
+  client-id: mobile-client
+  auth-server-url: http://localhost:8080

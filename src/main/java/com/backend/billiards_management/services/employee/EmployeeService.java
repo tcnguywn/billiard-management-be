@@ -1,9 +1,11 @@
 package com.backend.billiards_management.services.employee;
 
-import com.backend.billiards_management.dtos.request.CreateEmployeeReq;
-import com.backend.billiards_management.dtos.request.UpdateEmployeeReq;
-import com.backend.billiards_management.dtos.response.EmployeeRes;
+import com.backend.billiards_management.dtos.request.employee.CreateEmployeeReq;
+import com.backend.billiards_management.dtos.request.employee.UpdateEmployeeReq;
+import com.backend.billiards_management.dtos.response.employee.EmployeeRes;
 import com.backend.billiards_management.entities.employee.Employee;
+import com.backend.billiards_management.exceptions.AppException;
+import com.backend.billiards_management.exceptions.ErrorCode;
 import com.backend.billiards_management.repositories.EmployeeRepository;
 import com.backend.billiards_management.services.keycloak.KeycloakUserService;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,12 @@ public class EmployeeService {
 
     public EmployeeRes getEmployeeById(Integer employeeId) {
         return modelMapper.map(employeeRepository.findById(employeeId).orElse(null), EmployeeRes.class);
+    }
+
+    public EmployeeRes getEmployeeByKeycloakId(String keycloakId) {
+        Employee e = (Employee) employeeRepository.findByKeycloakId(keycloakId)
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Cannot find employee with keycloak id: " + keycloakId));
+        return modelMapper.map(e, EmployeeRes.class);
     }
 
     public List<EmployeeRes> getAllEmployees() {

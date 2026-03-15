@@ -6,6 +6,8 @@ import com.backend.billiards_management.entities.purchase_invoice.PurchaseInvoic
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "purchase_details")
 @Data
@@ -17,8 +19,8 @@ public class PurchaseDetail extends BaseEntity {
     @Column(name = "quantity")
     private Integer quantity;
 
-    @Column(name = "import_price")
-    private Integer importPrice;
+    @Column(name = "import_price", precision = 12, scale = 2)
+    private BigDecimal importPrice;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")

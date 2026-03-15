@@ -8,6 +8,8 @@ import com.backend.billiards_management.entities.invoice.enums.PaymentStatus;
 import com.backend.billiards_management.entities.voucher.Voucher;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
@@ -33,17 +35,17 @@ public class Invoice extends BaseEntity {
     @Column(name = "payment_method")
     private PaymentMethod paymentMethod;
 
-    @Column(name = "service_amount")
-    private Double serviceAmount;
+    @Column(name = "service_amount", precision = 12, scale = 2)
+    private BigDecimal serviceAmount;
 
-    @Column(name = "product_amount")
-    private Double productAmount;
+    @Column(name = "product_amount", precision = 12, scale = 2)
+    private BigDecimal productAmount;
 
-    @Column(name = "tax_amount")
-    private Double taxAmount;
+    @Column(name = "tax_amount", precision = 12, scale = 2)
+    private BigDecimal taxAmount;
 
-    @Column(name = "total_amount")
-    private Double totalAmount;
+    @Column(name = "total_amount", precision = 12, scale = 2)
+    private BigDecimal totalAmount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "voucher_id")

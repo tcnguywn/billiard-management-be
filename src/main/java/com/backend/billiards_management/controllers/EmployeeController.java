@@ -1,9 +1,8 @@
 package com.backend.billiards_management.controllers;
 
-import com.backend.billiards_management.dtos.request.CreateEmployeeReq;
-import com.backend.billiards_management.dtos.response.EmployeeRes;
+import com.backend.billiards_management.dtos.request.employee.CreateEmployeeReq;
+import com.backend.billiards_management.dtos.response.employee.EmployeeRes;
 import com.backend.billiards_management.services.employee.EmployeeService;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
