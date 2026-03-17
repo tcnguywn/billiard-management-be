@@ -1,23 +1,17 @@
 package com.backend.billiards_management.services.pricelist;
 
+import com.backend.billiards_management.dtos.request.pricelist.PricelistReq;
+import com.backend.billiards_management.dtos.request.pricelist.UpdatePricelistReq;
 import com.backend.billiards_management.dtos.response.pricelist.PricelistRes;
-import com.backend.billiards_management.entities.price_list.PriceList;
-import com.backend.billiards_management.repositories.PricelistRepository;
-import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
-@RequiredArgsConstructor
-public class PriceListService {
-    private final ModelMapper modelMapper;
-
-    private final PricelistRepository pricelistRepository;
-
-    public PricelistRes getPriceListById(Integer id) {
-        PriceList priceList = pricelistRepository.findById(id).orElseThrow(
-                () -> new RuntimeException("Cannot find price list with id: " + id)
-        );
-        return modelMapper.map(pricelistRepository.findById(id).orElse(null), PricelistRes.class);
-    }
+public interface PriceListService {
+    List<PricelistRes> getAllPriceLists();
+    PricelistRes getPriceListById(Integer id);
+    PricelistRes createPriceList(PricelistReq req);
+    PricelistRes updatePriceList(UpdatePricelistReq req);
+    void deletePriceList(Integer id);
 }

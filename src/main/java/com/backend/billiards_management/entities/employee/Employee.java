@@ -17,8 +17,8 @@ public class Employee extends BaseEntity {
     @Column(name = "keycloak_id", unique = true, nullable = false)
     private String keycloakId;
 
-    @Column(name = "fist_name")
-    private String fistName;
+    @Column(name = "first_name")
+    private String firstName;
 
     @Column(name = "last_name")
     private String lastName;

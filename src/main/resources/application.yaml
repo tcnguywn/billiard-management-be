@@ -37,3 +37,8 @@ keycloak:
   realm: billiard-management
   client-id: mobile-client
   auth-server-url: http://localhost:8080
+
+cloudinary:
+  cloud-name: dod4mribc
+  api-key: 499825916619773
+  api-secret: eFpfMmfsFwPU6rbcbzJySlwEJMM

@@ -1,6 +1,6 @@
 package com.backend.billiards_management.dtos.request.pricelist;
 
-import com.backend.billiards_management.entities.table_type.TableType;
+import com.backend.billiards_management.dtos.constant.TableType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,5 +21,5 @@ public class PricelistReq {
 
     private BigDecimal unitPrice;
 
-    private int tableTypeId;
+    private TableType tableType;
 }
