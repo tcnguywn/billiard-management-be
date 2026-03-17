@@ -1,5 +1,6 @@
 package com.backend.billiards_management.dtos.response.pricelist;
 
+import com.backend.billiards_management.dtos.constant.TableType;
 import lombok.Builder;
 import lombok.Data;
 
@@ -17,7 +18,5 @@ public class PricelistRes {
 
     private BigDecimal unitPrice;
 
-    private Long tableTypeId;
-
-    private String tableTypeName;
+    private TableType tableType;
 }

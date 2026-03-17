@@ -53,7 +53,7 @@ public class EmployeeService {
 
         Employee employee = Employee.builder()
                 .keycloakId(keycloakId)
-                .fistName(req.getFirstName())
+                .firstName(req.getFirstName())
                 .lastName(req.getLastName())
                 .email(req.getEmail())
                 .phoneNumber(req.getPhoneNumber())

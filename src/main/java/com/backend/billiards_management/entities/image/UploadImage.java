@@ -15,6 +15,6 @@ public class UploadImage extends BaseEntity {
     @Column(name = "image_url", length = 255)
     private String imageUrl;
 
-    @Column(name = "file_path", length = 255)
-    private String filePath;
+    @Column(name = "public_id", length = 255)
+    private String publicId;
 }
