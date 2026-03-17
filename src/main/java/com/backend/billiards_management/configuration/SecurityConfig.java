@@ -22,7 +22,9 @@ public class SecurityConfig {
                                         "/swagger-ui/**",
                                         "/v3/api-docs/**",
                                         "/swagger-ui.html",
-                                        "/api/v1/auth/login"
+                                        "/api/v1/auth/login",
+//                                        TODO: XOÁ ĐI SAU KHI TEST
+                                        "/api/v1/dashboard/**"
                                 ).permitAll()
                                 .requestMatchers("/api/v1/manager/**").permitAll()
                                 .requestMatchers("/api/v1/employees/**").permitAll()
