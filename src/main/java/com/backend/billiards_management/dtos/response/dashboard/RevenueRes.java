@@ -12,6 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RevenueRes {
-    public List<RevenueData> predict;
+    private List<RevenueData> predict;
     private List<RevenueData> actual;
 }
