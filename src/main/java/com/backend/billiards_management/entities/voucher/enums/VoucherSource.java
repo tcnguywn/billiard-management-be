@@ -1,6 +1,6 @@
 package com.backend.billiards_management.entities.voucher.enums;
 
-public enum VoucherType {
-    CASH,
-    PERCENTAGE,
+public enum VoucherSource {
+    AI,
+    MANUAL,
 }
