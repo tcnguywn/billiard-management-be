@@ -19,7 +19,7 @@ public class ForecastClient {
         try {
             List<RevenueData> result = webClient
 //                    TODO: Sửa lại, để trong file Constant hoặc gì đó
-                    .baseUrl("http://localhost:8000/api/v1")
+//                    .baseUrl("http://localhost:8000/api/v1")
                     .build()
                     .get()
                     .uri(uriBuilder -> uriBuilder

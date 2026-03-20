@@ -24,7 +24,8 @@ public class SecurityConfig {
                                         "/swagger-ui.html",
                                         "/api/v1/auth/login",
 //                                        TODO: XOÁ ĐI SAU KHI TEST
-                                        "/api/v1/dashboard/**"
+                                        "/api/v1/dashboard/**",
+                                        "/api/v1/invoices/**"
                                 ).permitAll()
                                 .requestMatchers("/api/v1/manager/**").permitAll()
                                 .requestMatchers("/api/v1/employees/**").permitAll()
