@@ -74,7 +74,7 @@ public class VoucherController {
         );
     }
 
-    @DeleteMapping("/{voucherId")
+    @DeleteMapping("/{voucherId}")
     public ResponseEntity<ApiResponse<String>> deleteVoucher(@RequestParam Long voucherId) {
         voucherService.deleteVoucher(voucherId);
         return ResponseEntity.ok(

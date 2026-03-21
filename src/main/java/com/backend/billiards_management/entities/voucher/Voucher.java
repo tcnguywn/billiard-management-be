@@ -28,7 +28,8 @@ public class Voucher extends BaseEntity {
     @Column(name = "value")
     private BigDecimal value;
 
-    @Column(name = "source")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "source", length = 20)
     private VoucherSource source;
 
     @Column(name = "status")

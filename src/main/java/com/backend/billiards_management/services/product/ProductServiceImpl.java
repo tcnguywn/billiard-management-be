@@ -40,7 +40,7 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     public List<ProductRes> getAllProducts() {
-        List<Product> products = productRepository.findByDeleteFalse();
+        List<Product> products = productRepository.findByDeletedFalse();
 
         List<ProductRes> productRes = new ArrayList<>();
         for (Product product : products) {
@@ -52,7 +52,7 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     public ProductRes getProductById(int id) {
-        Optional<Product> prod = productRepository.findByIdAndDeleteFalse(id);
+        Optional<Product> prod = productRepository.findByIdAndDeletedFalse(id);
 
         if (prod.isEmpty()) {
             throw new AppException(ErrorCode.NOT_FOUND, "Cannot find product with id: " + id);
@@ -66,7 +66,7 @@ public class ProductServiceImpl implements ProductService{
     public ProductRes upsertProduct(ProductUpsertReq req, MultipartFile imageFile) {
         Product product = new Product();
         if (isProductExist(req.getId())) {
-            product = productRepository.findByIdAndDeleteFalse(req.getId()).get();
+            product = productRepository.findByIdAndDeletedFalse(req.getId()).get();
         }
 
         if (req.getName() != null)
@@ -105,7 +105,7 @@ public class ProductServiceImpl implements ProductService{
     // Hay chỉ là ẩn đi
     @Override
     public void deleteProduct(int id) {
-        Optional<Product> product = productRepository.findByIdAndDeleteFalse(id);
+        Optional<Product> product = productRepository.findByIdAndDeletedFalse(id);
         if (product.isEmpty())
             throw new AppException(ErrorCode.NOT_FOUND, "Cannot find product with id: " + id);
         product.get().setDeleted(true);
@@ -118,7 +118,7 @@ public class ProductServiceImpl implements ProductService{
         List<Product> products = new ArrayList<>();
         List<ProductRes> productRes = new ArrayList<>();
         if (name == null || name.trim().isEmpty()) {
-            products = productRepository.findByDeleteFalse();
+            products = productRepository.findByDeletedFalse();
             for (Product product : products) {
                 productRes.add(modelMapperConfig.modelMapper().map(product, ProductRes.class));
             }
@@ -135,7 +135,7 @@ public class ProductServiceImpl implements ProductService{
     @Override
     @Transactional
     public void reduceStock(int productId, int quantity) {
-        Optional<Product> product = productRepository.findByIdAndDeleteFalse(productId);
+        Optional<Product> product = productRepository.findByIdAndDeletedFalse(productId);
         if (product.isEmpty())
             throw new AppException(ErrorCode.NOT_FOUND, "Cannot find product with id: " + productId);
         if (quantity > product.get().getStock())
@@ -151,6 +151,6 @@ public class ProductServiceImpl implements ProductService{
     }
 
     private boolean isProductExist(int id) {
-        return productRepository.findByIdAndDeleteFalse(id).isPresent();
+        return productRepository.findByIdAndDeletedFalse(id).isPresent();
     }
 }
