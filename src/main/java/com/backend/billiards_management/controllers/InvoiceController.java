@@ -1,5 +1,6 @@
 package com.backend.billiards_management.controllers;
 
+import com.backend.billiards_management.dtos.request.invoice.InvoiceDetailRes;
 import com.backend.billiards_management.dtos.request.invoice.InvoiceReq;
 import com.backend.billiards_management.dtos.response.ApiResponse;
 import com.backend.billiards_management.dtos.response.invoice.InvoiceRes;
@@ -32,9 +33,18 @@ public class InvoiceController {
     }
 
     @GetMapping("/{invoiceId}")
-    public ResponseEntity<ApiResponse<InvoiceRes>> getInvoiceById(
+    public ResponseEntity<ApiResponse<InvoiceDetailRes>> getInvoiceById(
             @PathVariable Integer invoiceId
     ) {
-        return null;
+
+        InvoiceDetailRes invoiceDetailRes = invoiceService.getInvoiceById(invoiceId);
+
+        ApiResponse<InvoiceDetailRes> apiResponse = ApiResponse.<InvoiceDetailRes>builder()
+                .status(HttpStatus.OK.value())
+                .message("")
+                .body(invoiceDetailRes)
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
     }
 }
