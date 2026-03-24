@@ -1,6 +1,5 @@
 package com.backend.billiards_management.dtos.response.invoice;
 
-import com.backend.billiards_management.entities.invoice.enums.PaymentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,13 +9,32 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class InvoiceRes {
     private int id;
-    private PaymentStatus status;
+    private Date startTime;
+    private Date endTime;
+    private String status;
+    private String paymentMethod;
+    private BigDecimal serviceAmount;
+    private BigDecimal productAmount;
+    private BigDecimal taxAmount;
     private BigDecimal totalAmount;
+
+    // Voucher info
+    private int voucherId;
+    private String voucherCode;
+
+    // Employee info
+    private int employeeId;
+    private String employeeName;
+
+    // BilliardTable info
+    private int billiardTableId;
+    private String billiardTableName;
+
     private Date createdAt;
     private Date updatedAt;
 }

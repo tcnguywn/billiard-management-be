@@ -1,80 +1,270 @@
 package com.backend.billiards_management.services.invoice;
 
-import com.backend.billiards_management.dtos.request.invoice.InvoiceDetailRes;
-import com.backend.billiards_management.dtos.request.invoice.InvoiceReq;
+import com.backend.billiards_management.dtos.request.invoice.CreateInvoiceReq;
+import com.backend.billiards_management.dtos.request.invoice.UpdateInvoiceReq;
 import com.backend.billiards_management.dtos.response.invoice.InvoiceRes;
+import com.backend.billiards_management.entities.billiard_table.BilliardTable;
+import com.backend.billiards_management.entities.employee.Employee;
 import com.backend.billiards_management.entities.invoice.Invoice;
+import com.backend.billiards_management.entities.invoice.enums.PaymentMethod;
+import com.backend.billiards_management.entities.invoice.enums.PaymentStatus;
+import com.backend.billiards_management.entities.voucher.Voucher;
 import com.backend.billiards_management.exceptions.AppException;
 import com.backend.billiards_management.exceptions.ErrorCode;
+import com.backend.billiards_management.repositories.EmployeeRepository;
 import com.backend.billiards_management.repositories.InvoiceRepository;
+import com.backend.billiards_management.repositories.TableRepository;
+import com.backend.billiards_management.repositories.VoucherRepository;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class InvoiceServiceImpl implements InvoiceService {
+
     private final InvoiceRepository invoiceRepository;
-    private final ModelMapper modelMapper;
+    private final EmployeeRepository employeeRepository;
+    private final TableRepository tableRepository;
+    private final VoucherRepository voucherRepository;
 
     @Override
-    public Page<InvoiceRes> getInvoicesByRange(InvoiceReq invoiceReq) {
+    @Transactional
+    public InvoiceRes createInvoice(CreateInvoiceReq req) {
+        // Tìm employee
+        Employee employee = employeeRepository.findById(req.getEmployeeId())
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,
+                        "Cannot find employee with id: " + req.getEmployeeId()));
 
-        if (invoiceReq.getPage() < 0) {
-            throw new IllegalArgumentException("Page must be greater than or equal to 0");
+        // Tìm billiard table
+        BilliardTable billiardTable = tableRepository.findById(req.getBilliardTableId())
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,
+                        "Cannot find billiard table with id: " + req.getBilliardTableId()));
+
+        // Tìm voucher nếu có
+        Voucher voucher = null;
+        if (req.getVoucherId() != 0) {
+            voucher = voucherRepository.findById((long) req.getVoucherId())
+                    .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,
+                            "Cannot find voucher with id: " + req.getVoucherId()));
         }
 
-        if (invoiceReq.getSize() <= 0) {
-            throw new IllegalArgumentException("Size must be greater than 0");
-        }
+        // Parse payment method
+        PaymentMethod paymentMethod = parsePaymentMethod(req.getPaymentMethod());
 
-        if (invoiceReq.getEndDate().before(invoiceReq.getStartDate())) {
-            throw new IllegalArgumentException("End date must be before start date");
-        }
+        Invoice invoice = Invoice.builder()
+                .startTime(req.getStartTime())
+                .endTime(req.getEndTime())
+                .status(PaymentStatus.UNPAID)
+                .paymentMethod(paymentMethod)
+                .serviceAmount(req.getServiceAmount())
+                .productAmount(req.getProductAmount())
+                .taxAmount(req.getTaxAmount())
+                .totalAmount(req.getTotalAmount())
+                .voucher(voucher)
+                .employee(employee)
+                .billiardTable(billiardTable)
+                .build();
 
-        Pageable pageable = PageRequest.of(invoiceReq.getPage(), invoiceReq.getSize());
-
-        Page<Invoice> invoiceList = invoiceRepository.findByCreatedAtBetweenAndDeletedFalse(
-                invoiceReq.getStartDate(),
-                invoiceReq.getEndDate(),
-                pageable
-        );
-
-        return invoiceList.map(invoice -> modelMapper.map(invoice, InvoiceRes.class));
+        Invoice savedInvoice = invoiceRepository.save(invoice);
+        return mapToRes(savedInvoice);
     }
 
     @Override
-    public InvoiceDetailRes getInvoiceById(Integer invoiceId) {
+    @Transactional
+    public InvoiceRes updateInvoice(UpdateInvoiceReq req) {
+        Invoice invoice = invoiceRepository.findById(req.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,
+                        "Cannot find invoice with id: " + req.getId()));
 
-        Invoice invoice = invoiceRepository.findByIdAndDeletedFalse(invoiceId)
-                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Invoice not found"));
-
-        InvoiceDetailRes invoiceDetailRes = modelMapper.map(invoice, InvoiceDetailRes.class);
-
-        if (invoice.getBilliardTable() == null) {
-            throw new AppException(ErrorCode.NOT_FOUND, "Billiard table not found");
+        if (invoice.isDeleted()) {
+            throw new AppException(ErrorCode.NOT_FOUND, "Invoice with id " + req.getId() + " has been deleted");
         }
 
-//        TODO: Set thêm các field còn thiếu
-        invoiceDetailRes.setTableName(invoice.getBilliardTable().getName());
-        invoiceDetailRes.setPlaytime(
-                String.valueOf(
-                        (invoice.getEndTime().getTime() - invoice.getStartTime().getTime()) / 3600000.0
-                )
-        );
-        invoiceDetailRes.setPlayAmount(BigDecimal.valueOf(0));
-        invoiceDetailRes.setTempAmount(
-                invoiceDetailRes.getPlayAmount()
-                        .add(invoiceDetailRes.getServiceAmount())
-                        .add(invoiceDetailRes.getProductAmount())
-        );
+        // Cập nhật employee nếu có
+        if (req.getEmployeeId() != 0) {
+            Employee employee = employeeRepository.findById(req.getEmployeeId())
+                    .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,
+                            "Cannot find employee with id: " + req.getEmployeeId()));
+            invoice.setEmployee(employee);
+        }
 
+        // Cập nhật billiard table nếu có
+        if (req.getBilliardTableId() != 0) {
+            BilliardTable billiardTable = tableRepository.findById(req.getBilliardTableId())
+                    .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,
+                            "Cannot find billiard table with id: " + req.getBilliardTableId()));
+            invoice.setBilliardTable(billiardTable);
+        }
 
-        return invoiceDetailRes;
+        // Cập nhật voucher nếu có
+        if (req.getVoucherId() != 0) {
+            Voucher voucher = voucherRepository.findById((long) req.getVoucherId())
+                    .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,
+                            "Cannot find voucher with id: " + req.getVoucherId()));
+            invoice.setVoucher(voucher);
+        }
+
+        if (req.getStartTime() != null) {
+            invoice.setStartTime(req.getStartTime());
+        }
+        if (req.getEndTime() != null) {
+            invoice.setEndTime(req.getEndTime());
+        }
+        if (req.getStatus() != null) {
+            invoice.setStatus(parsePaymentStatus(req.getStatus()));
+        }
+        if (req.getPaymentMethod() != null) {
+            invoice.setPaymentMethod(parsePaymentMethod(req.getPaymentMethod()));
+        }
+        if (req.getServiceAmount() != null) {
+            invoice.setServiceAmount(req.getServiceAmount());
+        }
+        if (req.getProductAmount() != null) {
+            invoice.setProductAmount(req.getProductAmount());
+        }
+        if (req.getTaxAmount() != null) {
+            invoice.setTaxAmount(req.getTaxAmount());
+        }
+        if (req.getTotalAmount() != null) {
+            invoice.setTotalAmount(req.getTotalAmount());
+        }
+
+        Invoice updatedInvoice = invoiceRepository.save(invoice);
+        return mapToRes(updatedInvoice);
+    }
+
+    @Override
+    public InvoiceRes getInvoiceById(int id) {
+        Invoice invoice = invoiceRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,
+                        "Cannot find invoice with id: " + id));
+
+        if (invoice.isDeleted()) {
+            throw new AppException(ErrorCode.NOT_FOUND, "Invoice with id " + id + " has been deleted");
+        }
+
+        return mapToRes(invoice);
+    }
+
+    @Override
+    public List<InvoiceRes> getAllInvoices() {
+        List<Invoice> invoices = invoiceRepository.findByDeletedFalse();
+        List<InvoiceRes> invoiceResList = new ArrayList<>();
+        for (Invoice invoice : invoices) {
+            invoiceResList.add(mapToRes(invoice));
+        }
+        return invoiceResList;
+    }
+
+    @Override
+    @Transactional
+    public void deleteInvoice(int id) {
+        Invoice invoice = invoiceRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,
+                        "Cannot find invoice with id: " + id));
+
+        if (invoice.isDeleted()) {
+            throw new AppException(ErrorCode.NOT_FOUND, "Invoice with id " + id + " has already been deleted");
+        }
+
+        invoice.setDeleted(true);
+        invoiceRepository.save(invoice);
+    }
+
+    @Override
+    public List<InvoiceRes> getInvoicesByStatus(String status) {
+        PaymentStatus paymentStatus = parsePaymentStatus(status);
+        List<Invoice> invoices = invoiceRepository.findByStatusAndDeletedFalse(paymentStatus);
+        List<InvoiceRes> invoiceResList = new ArrayList<>();
+        for (Invoice invoice : invoices) {
+            invoiceResList.add(mapToRes(invoice));
+        }
+        return invoiceResList;
+    }
+
+    @Override
+    public List<InvoiceRes> getInvoicesByEmployeeId(int employeeId) {
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,
+                        "Cannot find employee with id: " + employeeId));
+
+        List<Invoice> invoices = invoiceRepository.findByEmployeeAndDeletedFalse(employee);
+        List<InvoiceRes> invoiceResList = new ArrayList<>();
+        for (Invoice invoice : invoices) {
+            invoiceResList.add(mapToRes(invoice));
+        }
+        return invoiceResList;
+    }
+
+    // === Private helper methods ===
+
+    private PaymentMethod parsePaymentMethod(String method) {
+        if (method == null) return null;
+        try {
+            return PaymentMethod.valueOf(method.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new AppException(ErrorCode.BAD_REQUEST,
+                    "Invalid payment method: " + method + ". Accepted values: CASH, CREDIT_CARD");
+        }
+    }
+
+    private PaymentStatus parsePaymentStatus(String status) {
+        if (status == null) return null;
+        try {
+            return PaymentStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new AppException(ErrorCode.BAD_REQUEST,
+                    "Invalid payment status: " + status + ". Accepted values: PAID, UNPAID");
+        }
+    }
+
+    /**
+     * Map Invoice entity sang InvoiceRes DTO
+     */
+    private InvoiceRes mapToRes(Invoice invoice) {
+        String employeeName = "";
+        int employeeId = 0;
+        if (invoice.getEmployee() != null) {
+            employeeId = invoice.getEmployee().getId();
+            employeeName = invoice.getEmployee().getFirstName() + " " + invoice.getEmployee().getLastName();
+        }
+
+        int voucherId = 0;
+        String voucherCode = "";
+        if (invoice.getVoucher() != null) {
+            voucherId = invoice.getVoucher().getId();
+            voucherCode = invoice.getVoucher().getVoucherCode();
+        }
+
+        int billiardTableId = 0;
+        String billiardTableName = "";
+        if (invoice.getBilliardTable() != null) {
+            billiardTableId = invoice.getBilliardTable().getId();
+            billiardTableName = invoice.getBilliardTable().getName();
+        }
+
+        return InvoiceRes.builder()
+                .id(invoice.getId())
+                .startTime(invoice.getStartTime())
+                .endTime(invoice.getEndTime())
+                .status(invoice.getStatus() != null ? invoice.getStatus().name() : null)
+                .paymentMethod(invoice.getPaymentMethod() != null ? invoice.getPaymentMethod().name() : null)
+                .serviceAmount(invoice.getServiceAmount())
+                .productAmount(invoice.getProductAmount())
+                .taxAmount(invoice.getTaxAmount())
+                .totalAmount(invoice.getTotalAmount())
+                .voucherId(voucherId)
+                .voucherCode(voucherCode)
+                .employeeId(employeeId)
+                .employeeName(employeeName)
+                .billiardTableId(billiardTableId)
+                .billiardTableName(billiardTableName)
+                .createdAt(invoice.getCreatedAt())
+                .updatedAt(invoice.getUpdatedAt())
+                .build();
     }
 }
