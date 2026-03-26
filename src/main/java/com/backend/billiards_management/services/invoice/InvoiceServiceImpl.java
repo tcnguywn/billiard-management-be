@@ -3,11 +3,13 @@ package com.backend.billiards_management.services.invoice;
 import com.backend.billiards_management.dtos.request.invoice.CreateInvoiceReq;
 import com.backend.billiards_management.dtos.request.invoice.UpdateInvoiceReq;
 import com.backend.billiards_management.dtos.response.invoice.InvoiceRes;
+import com.backend.billiards_management.dtos.response.order_detail.OrderDetailRes;
 import com.backend.billiards_management.entities.billiard_table.BilliardTable;
 import com.backend.billiards_management.entities.employee.Employee;
 import com.backend.billiards_management.entities.invoice.Invoice;
 import com.backend.billiards_management.entities.invoice.enums.PaymentMethod;
 import com.backend.billiards_management.entities.invoice.enums.PaymentStatus;
+import com.backend.billiards_management.entities.order_detail.OrderDetail;
 import com.backend.billiards_management.entities.voucher.Voucher;
 import com.backend.billiards_management.exceptions.AppException;
 import com.backend.billiards_management.exceptions.ErrorCode;
@@ -19,7 +21,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -200,6 +206,22 @@ public class InvoiceServiceImpl implements InvoiceService {
         return invoiceResList;
     }
 
+    @Override
+    public List<InvoiceRes> getInvoicesByRange(LocalDate startDate, LocalDate endDate) {
+
+        ZoneId zone = ZoneId.systemDefault();
+
+        Date start = Date.from(startDate.atStartOfDay(zone).toInstant());
+        Date end = Date.from(endDate.atTime(LocalTime.MAX).atZone(zone).toInstant());
+
+        List<Invoice> invoices = invoiceRepository.findByDeletedFalseAndCreatedAtBetween(start, end);
+        List<InvoiceRes> invoiceResList = new ArrayList<>();
+        for (Invoice invoice : invoices) {
+            invoiceResList.add(mapToRes(invoice));
+        }
+        return invoiceResList;
+    }
+
     // === Private helper methods ===
 
     private PaymentMethod parsePaymentMethod(String method) {
@@ -247,6 +269,16 @@ public class InvoiceServiceImpl implements InvoiceService {
             billiardTableName = invoice.getBilliardTable().getName();
         }
 
+        List<OrderDetailRes> orderDetailResList = new ArrayList<>();
+        for (OrderDetail i : invoice.getOrderDetailList()) {
+            OrderDetailRes orderDetailRes = OrderDetailRes.builder()
+                    .productName(i.getProduct().getName())
+                    .quantity(i.getQuantity())
+                    .totalPrice(i.getPrice())
+                    .build();
+            orderDetailResList.add(orderDetailRes);
+        }
+
         return InvoiceRes.builder()
                 .id(invoice.getId())
                 .startTime(invoice.getStartTime())
@@ -263,6 +295,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .employeeName(employeeName)
                 .billiardTableId(billiardTableId)
                 .billiardTableName(billiardTableName)
+                .orderDetailResList(orderDetailResList)
                 .createdAt(invoice.getCreatedAt())
                 .updatedAt(invoice.getUpdatedAt())
                 .build();

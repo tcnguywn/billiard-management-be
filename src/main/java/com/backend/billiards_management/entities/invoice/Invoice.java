@@ -5,19 +5,22 @@ import com.backend.billiards_management.entities.billiard_table.BilliardTable;
 import com.backend.billiards_management.entities.employee.Employee;
 import com.backend.billiards_management.entities.invoice.enums.PaymentMethod;
 import com.backend.billiards_management.entities.invoice.enums.PaymentStatus;
+import com.backend.billiards_management.entities.order_detail.OrderDetail;
 import com.backend.billiards_management.entities.voucher.Voucher;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "invoices")
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
+@Setter
 public class Invoice extends BaseEntity {
 
     @Temporal(TemporalType.TIMESTAMP)
@@ -59,4 +62,7 @@ public class Invoice extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "billiard_table_id")
     private BilliardTable billiardTable;
+
+    @OneToMany(mappedBy = "invoice")
+    private List<OrderDetail> orderDetailList;
 }

@@ -10,10 +10,12 @@ import java.util.Date;
 
 @Entity
 @Table(name = "order_details")
-@Data
+//@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
+@Setter
 public class OrderDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
