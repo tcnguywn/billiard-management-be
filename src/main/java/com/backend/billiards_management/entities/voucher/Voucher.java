@@ -1,6 +1,7 @@
 package com.backend.billiards_management.entities.voucher;
 
 import com.backend.billiards_management.entities.BaseEntity;
+import com.backend.billiards_management.entities.voucher.enums.VoucherSource;
 import com.backend.billiards_management.entities.voucher.enums.VoucherStatus;
 import com.backend.billiards_management.entities.voucher.enums.VoucherType;
 import jakarta.persistence.*;
@@ -25,10 +26,11 @@ public class Voucher extends BaseEntity {
     private VoucherType type;
 
     @Column(name = "value")
-    private Double value;
+    private BigDecimal value;
 
-    @Column(name = "source")
-    private String source;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "source", length = 20)
+    private VoucherSource source;
 
     @Column(name = "status")
     private VoucherStatus status;
@@ -46,4 +48,7 @@ public class Voucher extends BaseEntity {
 
     @Column(name = "minimum_amount", precision = 10, scale = 2)
     private BigDecimal minimumAmount;
+
+    @Column(name = "maximum_amount", precision = 10, scale = 2)
+    private BigDecimal maximumValue;
 }

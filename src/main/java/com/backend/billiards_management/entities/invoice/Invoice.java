@@ -29,6 +29,7 @@ public class Invoice extends BaseEntity {
     @Column(name = "end_time")
     private LocalDateTime endTime;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private PaymentStatus status;
 
