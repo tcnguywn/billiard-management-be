@@ -1,11 +1,14 @@
 package com.backend.billiards_management.entities.order_detail;
 
+import com.backend.billiards_management.entities.BaseEntity;
 import com.backend.billiards_management.entities.invoice.Invoice;
 import com.backend.billiards_management.entities.product.Product;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -14,10 +17,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderDetail {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+public class OrderDetail extends BaseEntity {
 
     @Column(name = "price", precision = 10, scale = 2)
     private BigDecimal price;
@@ -28,13 +28,11 @@ public class OrderDetail {
     @Column(name = "note")
     private String note;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "start_time")
-    private Date startTime;
+    private LocalDateTime startTime;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "end_time")
-    private Date endTime;
+    private LocalDateTime endTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "invoice_id")

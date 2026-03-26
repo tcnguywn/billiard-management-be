@@ -27,16 +27,13 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService{
 
-    @Autowired
-    ProductRepository productRepository;
-    @Autowired
-    ImageRepository imageRepository;
-    @Autowired
-    ProductCategoryRepository productCategoryRepository;
+    private final ProductRepository productRepository;
+    private final ImageRepository imageRepository;
+    private final ProductCategoryRepository productCategoryRepository;
 
-    UploadImageService uploadImageService;
-    ModelMapperConfig modelMapperConfig;
-    RestTemplateConfig restTemplateConfig;
+    private final UploadImageService uploadImageService;
+    private final ModelMapperConfig modelMapperConfig;
+    private final RestTemplateConfig restTemplateConfig;
 
     @Override
     public List<ProductRes> getAllProducts() {

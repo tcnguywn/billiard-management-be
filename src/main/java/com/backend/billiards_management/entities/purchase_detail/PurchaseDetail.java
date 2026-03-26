@@ -29,5 +29,4 @@ public class PurchaseDetail extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "purchase_invoice_id")
     private PurchaseInvoice purchaseInvoice;
-
 }

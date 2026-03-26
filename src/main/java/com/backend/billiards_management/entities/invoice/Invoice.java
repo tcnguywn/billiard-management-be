@@ -5,12 +5,15 @@ import com.backend.billiards_management.entities.billiard_table.BilliardTable;
 import com.backend.billiards_management.entities.employee.Employee;
 import com.backend.billiards_management.entities.invoice.enums.PaymentMethod;
 import com.backend.billiards_management.entities.invoice.enums.PaymentStatus;
+import com.backend.billiards_management.entities.order_detail.OrderDetail;
 import com.backend.billiards_management.entities.voucher.Voucher;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "invoices")
@@ -20,13 +23,11 @@ import java.util.Date;
 @Builder
 public class Invoice extends BaseEntity {
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "start_time")
-    private Date startTime;
+    private LocalDateTime startTime;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "end_time")
-    private Date endTime;
+    private LocalDateTime endTime;
 
     @Column(name = "status")
     private PaymentStatus status;
