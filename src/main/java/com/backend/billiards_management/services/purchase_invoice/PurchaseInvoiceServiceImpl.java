@@ -43,7 +43,7 @@ public class PurchaseInvoiceServiceImpl implements PurchaseInvoiceService {
         BigDecimal totalAmount = BigDecimal.ZERO;
 
         for(PurchaseDetailReq detailReq : req.getDetails()) {
-            Product product = productRepository.findById(detailReq.getProductId())
+            Product product = productRepository.findById((long) detailReq.getProductId())
                     .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Cannot find product with id: " + detailReq.getProductId()));
 
             int currentStock = product.getStock() != null ? product.getStock() : 0;

@@ -9,7 +9,8 @@ import lombok.*;
 
 @Entity
 @Table(name = "billiard_tables")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

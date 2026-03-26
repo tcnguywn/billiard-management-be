@@ -10,7 +10,8 @@ import java.util.Date;
 
 @Entity
 @Table(name = "price_lists")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

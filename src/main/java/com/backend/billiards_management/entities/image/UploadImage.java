@@ -6,7 +6,8 @@ import lombok.*;
 
 @Entity
 @Table(name = "upload_images")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

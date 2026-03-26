@@ -12,7 +12,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "purchase_invoices")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
