@@ -7,7 +7,11 @@ import com.backend.billiards_management.dtos.response.product.ProductRes;
 import com.backend.billiards_management.entities.product.Product;
 import com.backend.billiards_management.services.product.ProductService;
 import com.cloudinary.Api;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,18 +26,29 @@ import java.util.List;
 public class ProductController {
     private final ProductService productService;
 
-    @PostMapping(value ="/upsert", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponse<ProductRes>> upsertProduct(
-            @RequestPart("product")ProductUpsertReq req,
+//    @PostMapping(value ="/upsert", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ResponseEntity<ApiResponse<ProductRes>> upsertProduct(
+//            @RequestPart("product")ProductUpsertReq req,
+//            @RequestPart("image") MultipartFile imageFile
+//            ) {
+//        ProductRes saveProduct = productService.upsertProduct(req, imageFile);
+//        return ResponseEntity.ok(ApiResponse.<ProductRes>builder()
+//                .status(HttpStatus.OK.value())
+//                .message("upsert product success")
+//                .body(saveProduct)
+//                .build()
+//        );
+//    }
+
+    @PostMapping(value = "/upsert", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> upsertProduct(
+            @RequestPart("product") String productJson,
             @RequestPart("image") MultipartFile imageFile
-            ) {
-        ProductRes saveProduct = productService.upsertProduct(req, imageFile);
-        return ResponseEntity.ok(ApiResponse.<ProductRes>builder()
-                .status(HttpStatus.OK.value())
-                .message("upsert product success")
-                .body(saveProduct)
-                .build()
-        );
+    ) throws Exception {
+
+        ProductUpsertReq req = new ObjectMapper().readValue(productJson, ProductUpsertReq.class);
+
+        return ResponseEntity.ok(productService.upsertProduct(req, imageFile));
     }
 
     @GetMapping("/{productId}")
@@ -48,12 +63,14 @@ public class ProductController {
     }
 
     @GetMapping()
-    public ResponseEntity<ApiResponse<List<ProductRes>>> getAllProducts() {
+    public ResponseEntity<ApiResponse<Page<ProductRes>>> getAllProducts(
+            @PageableDefault(page = 0, size = 10) Pageable pageable
+    ) {
 
-        List<ProductRes> products = productService.getAllProducts();
+        Page<ProductRes> products = productService.getAllProducts(pageable);
 
         return ResponseEntity.ok(
-                ApiResponse.<List<ProductRes>>builder()
+                ApiResponse.<Page<ProductRes>>builder()
                         .status(HttpStatus.OK.value())
                         .message("get all products success")
                         .body(products)
@@ -70,8 +87,8 @@ public class ProductController {
                 .build());
     }
 
-    @GetMapping()
-    public ResponseEntity<ApiResponse<List<ProductRes>>> searchProduct(@RequestBody String keyword) {
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<ProductRes>>> searchProduct(@RequestParam String keyword) {
         return ResponseEntity.ok(
                 ApiResponse.<List<ProductRes>>builder()
                         .status(HttpStatus.OK.value())

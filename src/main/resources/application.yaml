@@ -20,7 +20,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
@@ -42,3 +42,6 @@ cloudinary:
   cloud-name: dod4mribc
   api-key: 499825916619773
   api-secret: eFpfMmfsFwPU6rbcbzJySlwEJMM
+logging:
+  level:
+    org.springframework.security: DEBUG

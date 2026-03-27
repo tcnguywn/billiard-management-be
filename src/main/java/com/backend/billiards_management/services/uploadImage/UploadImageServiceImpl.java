@@ -4,6 +4,7 @@ import com.backend.billiards_management.configuration.CloudinaryConfig;
 import com.backend.billiards_management.entities.image.UploadImage;
 import com.backend.billiards_management.exceptions.AppException;
 import com.backend.billiards_management.exceptions.ErrorCode;
+import com.backend.billiards_management.repositories.ImageRepository;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import lombok.AllArgsConstructor;
@@ -21,6 +22,8 @@ public class UploadImageServiceImpl implements UploadImageService {
 
     private final Cloudinary cloudinary;
 
+    private final ImageRepository imageRepository;
+
     public UploadImage uploadImageToCloudinary(MultipartFile file) {
         try {
             Map uploadResult = cloudinary.uploader().upload(
@@ -34,10 +37,11 @@ public class UploadImageServiceImpl implements UploadImageService {
             String imageUrl = uploadResult.get("secure_url").toString();
             String publicId = uploadResult.get("public_id").toString();
 
-            return UploadImage.builder()
+            UploadImage uploadImage = UploadImage.builder()
                     .imageUrl(imageUrl)
                     .publicId(publicId)
                     .build();
+            return imageRepository.save(uploadImage);
         } catch (Exception e) {
             throw new AppException(ErrorCode.INTERNAL_ERROR,
                     "Failed to upload image to Cloudinary");

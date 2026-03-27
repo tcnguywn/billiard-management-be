@@ -15,6 +15,8 @@ import com.backend.billiards_management.repositories.ProductRepository;
 import com.backend.billiards_management.repositories.PurchaseInvoiceRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -85,6 +87,12 @@ public class PurchaseInvoiceServiceImpl implements PurchaseInvoiceService {
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Cannot find purchase invoice with id: " + id));
 
         purchaseInvoiceRepository.delete(invoice);
+    }
+
+    @Override
+    public Page<PurchaseInvoiceRes> getAllPurchaseInvoices(Pageable pageable) {
+        return purchaseInvoiceRepository.findAll(pageable)
+                .map(this::mapToResponse);
     }
 
     private PurchaseInvoiceRes mapToResponse(PurchaseInvoice invoice) {

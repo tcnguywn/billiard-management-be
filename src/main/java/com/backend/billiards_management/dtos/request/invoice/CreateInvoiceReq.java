@@ -3,12 +3,13 @@ package com.backend.billiards_management.dtos.request.invoice;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
 public class CreateInvoiceReq {
-    private Date startTime;
-    private Date endTime;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
     private String paymentMethod;
     private BigDecimal serviceAmount;
     private BigDecimal productAmount;

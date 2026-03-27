@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
@@ -14,8 +15,8 @@ import java.util.Date;
 @AllArgsConstructor
 public class InvoiceRes {
     private int id;
-    private Date startTime;
-    private Date endTime;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
     private String status;
     private String paymentMethod;
     private BigDecimal serviceAmount;

@@ -61,4 +61,10 @@ public class Invoice extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "billiard_table_id")
     private BilliardTable billiardTable;
+
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "invoice_id")
+    private List<OrderDetail> orderDetails;
+
+
 }

@@ -10,6 +10,8 @@ import com.backend.billiards_management.repositories.EmployeeRepository;
 import com.backend.billiards_management.services.keycloak.KeycloakUserService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,11 +36,9 @@ public class EmployeeService {
         return modelMapper.map(e, EmployeeRes.class);
     }
 
-    public List<EmployeeRes> getAllEmployees() {
-        return employeeRepository.findAll()
-                .stream()
-                .map(e -> modelMapper.map(e, EmployeeRes.class))
-                .toList();
+    public Page<EmployeeRes> getAllEmployees(Pageable pageable) {
+        return employeeRepository.findAll(pageable)
+                .map(e -> modelMapper.map(e, EmployeeRes.class));
     }
 
     public EmployeeRes createEmployee(CreateEmployeeReq req) {

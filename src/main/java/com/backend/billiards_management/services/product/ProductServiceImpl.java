@@ -14,7 +14,10 @@ import com.backend.billiards_management.repositories.ProductCategoryRepository;
 import com.backend.billiards_management.repositories.ProductRepository;
 import com.backend.billiards_management.services.uploadImage.UploadImageService;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,17 +37,12 @@ public class ProductServiceImpl implements ProductService{
     private final UploadImageService uploadImageService;
     private final ModelMapperConfig modelMapperConfig;
     private final RestTemplateConfig restTemplateConfig;
+    private final ModelMapper modelMapper;
 
     @Override
-    public List<ProductRes> getAllProducts() {
-        List<Product> products = productRepository.findByDeletedFalse();
-
-        List<ProductRes> productRes = new ArrayList<>();
-        for (Product product : products) {
-            productRes.add(modelMapperConfig.modelMapper().map(product, ProductRes.class));
-        }
-
-        return productRes;
+    public Page<ProductRes> getAllProducts(Pageable pageable) {
+        return productRepository.findAll(pageable)
+                .map(product -> modelMapperConfig.modelMapper().map(product, ProductRes.class));
     }
 
     @Override
@@ -72,7 +70,10 @@ public class ProductServiceImpl implements ProductService{
             product.setSellingPrice(req.getSellingPrice());
         }
         if (req.getInitStock() != 0) {
-            product.setStock(req.getInitStock() + product.getStock());
+            if (product.getStock() == null) {
+                product.setStock(req.getInitStock());
+            }
+            else product.setStock(req.getInitStock() + product.getStock());
         }
 
         // Thiếu trường hợp thêm mới category
@@ -95,7 +96,7 @@ public class ProductServiceImpl implements ProductService{
             product.setImage(existingImage);
         }
 
-        return modelMapperConfig.modelMapper().map(productRepository.save(product), ProductRes.class);
+        return modelMapper.map(productRepository.save(product), ProductRes.class);
     }
 
     // Chưa quy định logic nếu xóa hết tất cả product của 1 category thì category đó bị xóa luôn

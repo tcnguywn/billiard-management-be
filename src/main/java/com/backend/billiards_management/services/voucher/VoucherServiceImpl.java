@@ -26,7 +26,6 @@ import java.util.concurrent.ThreadLocalRandom;
 @RequiredArgsConstructor
 public class VoucherServiceImpl implements VoucherService{
 
-    @Autowired
     private final VoucherRepository voucherRepository;
     private final ModelMapperConfig modelMapperConfig;
     @Override
