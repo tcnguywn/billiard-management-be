@@ -10,10 +10,11 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "products")
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
+@Setter
 public class Product extends BaseEntity {
 
     @Column(name = "name", length = 255)

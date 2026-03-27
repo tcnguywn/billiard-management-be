@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -208,6 +209,17 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     public List<InvoiceRes> getInvoicesByRange(LocalDate startDate, LocalDate endDate) {
+        if (startDate == null || endDate == null) {
+            throw new AppException(ErrorCode.BAD_REQUEST, "Start date and end date cannot be null");
+        }
+
+        if (startDate.isAfter(endDate)) {
+            throw new AppException(ErrorCode.BAD_REQUEST, "Start date cannot be after end date");
+        }
+
+        if (ChronoUnit.DAYS.between(startDate, endDate) > 30) {
+            throw new AppException(ErrorCode.BAD_REQUEST, "Date range cannot exceed 30 days");
+        }
 
         ZoneId zone = ZoneId.systemDefault();
 
