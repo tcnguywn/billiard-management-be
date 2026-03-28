@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Map;
 
 @Service
@@ -24,6 +25,8 @@ public class UploadImageServiceImpl implements UploadImageService {
 
     private final ImageRepository imageRepository;
 
+
+    @Override
     public UploadImage uploadImageToCloudinary(MultipartFile file) {
         try {
             Map uploadResult = cloudinary.uploader().upload(
@@ -45,6 +48,21 @@ public class UploadImageServiceImpl implements UploadImageService {
         } catch (Exception e) {
             throw new AppException(ErrorCode.INTERNAL_ERROR,
                     "Failed to upload image to Cloudinary");
+        }
+    }
+
+    @Override
+    public void deleteImageFromCloudinary(String publicId){
+        try {
+            Map result = cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+
+            String status = (String) result.get("result");
+            if (!"ok".equals(status)) {
+                throw new RuntimeException("Delete image failed: " + result);
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException("Error deleting image from Cloudinary", e);
         }
     }
 }

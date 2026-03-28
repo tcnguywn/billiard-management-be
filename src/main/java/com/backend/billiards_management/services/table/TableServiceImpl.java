@@ -9,13 +9,14 @@ import com.backend.billiards_management.entities.image.UploadImage;
 import com.backend.billiards_management.exceptions.AppException;
 import com.backend.billiards_management.exceptions.ErrorCode;
 import com.backend.billiards_management.repositories.TableRepository;
-import com.backend.billiards_management.services.image.UploadImageService;
+import com.backend.billiards_management.services.uploadImage.UploadImageService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.multipart.MultipartFile;
 
 @Repository
 @RequiredArgsConstructor
@@ -31,18 +32,22 @@ public class TableServiceImpl implements TableService {
     }
 
     @Override
-    public Page<TableRes> getTables(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public Page<TableRes> getTables(Pageable pageable) {
         Page<BilliardTable> tables = tableRepository.findAll(pageable);
-        return tables.map(table -> modelMapper.map(table, TableRes.class));
+
+        return tables.map(table -> {
+            TableRes res = modelMapper.map(table, TableRes.class);
+            res.setImageUrl(table.getUploadImage().getImageUrl()); // set thêm nếu cần override
+            return res;
+        });
     }
 
     @Override
     public TableRes createTable(BilliardTableReq req) {
         UploadImage uploadImage = null;
-
-        if (req.getImageFile() != null && !req.getImageFile().isEmpty()) {
-            uploadImage = uploadImageService.upload(req.getImageFile());
+        MultipartFile imageFile = req.getImageFile();
+        if (imageFile != null && !imageFile.isEmpty()) {
+            uploadImage = uploadImageService.uploadImageToCloudinary(imageFile);
         }
         BilliardTable table = BilliardTable.builder()
                 .name(req.getName())
@@ -63,6 +68,7 @@ public class TableServiceImpl implements TableService {
     public TableRes updateTable(UpdateTableReq req) {
         BilliardTable table = tableRepository.findById(req.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Table not found"));
+        MultipartFile imageFile = req.getImageFile();
 
         if (req.getName() != null) {
             table.setName(req.getName());
@@ -76,11 +82,19 @@ public class TableServiceImpl implements TableService {
             table.setTableType(req.getTableType());
         }
 
-        if (req.getImageFile() != null && !req.getImageFile().isEmpty()) {
+        if (imageFile != null && !imageFile.isEmpty()) {
 
-            UploadImage uploadImage = uploadImageService.upload(req.getImageFile());
+            UploadImage uploadImage = uploadImageService.uploadImageToCloudinary(imageFile);
+
+            if (table.getUploadImage() != null) {
+                uploadImageService.deleteImageFromCloudinary(table.getUploadImage().getPublicId());
+            }
 
             table.setUploadImage(uploadImage);
+        }
+        else if (imageFile == null) {
+
+            table.setUploadImage(table.getUploadImage());
         }
 
         table = tableRepository.save(table);

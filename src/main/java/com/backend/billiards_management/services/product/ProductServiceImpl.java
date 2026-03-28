@@ -58,11 +58,13 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     @Transactional
-    public ProductRes upsertProduct(ProductUpsertReq req, MultipartFile imageFile) {
+    public ProductRes upsertProduct(ProductUpsertReq req) {
         Product product = new Product();
         if (isProductExist(req.getId())) {
             product = productRepository.findByIdAndDeletedFalse(req.getId()).get();
         }
+
+        MultipartFile imageFile = req.getImage();
 
         if (req.getName() != null)
             product.setName(req.getName());
@@ -95,8 +97,11 @@ public class ProductServiceImpl implements ProductService{
                             "Cannot find image with id: " + finalProduct.getImage().getId()));
             product.setImage(existingImage);
         }
-
-        return modelMapper.map(productRepository.save(product), ProductRes.class);
+        ProductRes productRes = modelMapper.map(product, ProductRes.class);
+        if(product.getImage() != null) {
+            productRes.setImageUrl(product.getImage().getImageUrl());
+        }
+        return productRes;
     }
 
     // Chưa quy định logic nếu xóa hết tất cả product của 1 category thì category đó bị xóa luôn

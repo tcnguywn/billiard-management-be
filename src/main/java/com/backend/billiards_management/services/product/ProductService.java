@@ -11,7 +11,7 @@ import java.util.List;
 public interface ProductService {
     Page<ProductRes> getAllProducts(Pageable pageable);
     ProductRes getProductById(int id);
-    ProductRes upsertProduct(ProductUpsertReq req, MultipartFile imageFile);
+    ProductRes upsertProduct(ProductUpsertReq req);
     void deleteProduct(int id);
     List<ProductRes> filterProducts(String name);
     void reduceStock(int productId, int quantity);

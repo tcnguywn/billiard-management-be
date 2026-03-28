@@ -7,20 +7,31 @@ import com.backend.billiards_management.dtos.response.billiard_table.TableRes;
 import com.backend.billiards_management.services.table.TableService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.beans.PropertyEditorSupport;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/tables")
 @RequiredArgsConstructor
-public class TableController {
+public class TableController extends BaseController {
+
+    private static final Set<String> VALID_SORT_FIELDS = Set.of("id", "name", "updatedAt", "createdAt");
+
 
     private final TableService tableService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponse<TableRes>> createTable(@ModelAttribute BilliardTableReq req) {
+    public ResponseEntity<ApiResponse<TableRes>> createTable(
+            @ModelAttribute BilliardTableReq req) {
         return ResponseEntity.ok(
                 ApiResponse.<TableRes>builder()
                         .status(HttpStatus.OK.value())
@@ -54,14 +65,14 @@ public class TableController {
 
     @GetMapping()
     public ResponseEntity<ApiResponse<Page<TableRes>>> getTables(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @PageableDefault(page = 0, size = 10) Pageable pageable
     ) {
+//        pageable = PageableUtils.sanitize(pageable, "id", VALID_SORT_FIELDS);
         return ResponseEntity.ok(
                 ApiResponse.<Page<TableRes>>builder()
                         .status(HttpStatus.OK.value())
                         .message("Get tables success")
-                        .body(tableService.getTables(page, size))
+                        .body(tableService.getTables(pageable))
                         .build()
         );
     }

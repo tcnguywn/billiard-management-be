@@ -1,6 +1,8 @@
 package com.backend.billiards_management.dtos.request.product;
 
+import com.backend.billiards_management.entities.image.UploadImage;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 
@@ -13,4 +15,5 @@ public class ProductUpsertReq {
     int initStock;
     int imageId;
     int categoryId;
+    MultipartFile image;
 }

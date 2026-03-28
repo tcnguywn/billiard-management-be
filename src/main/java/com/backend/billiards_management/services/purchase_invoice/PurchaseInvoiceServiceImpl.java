@@ -13,6 +13,7 @@ import com.backend.billiards_management.exceptions.ErrorCode;
 import com.backend.billiards_management.repositories.EmployeeRepository;
 import com.backend.billiards_management.repositories.ProductRepository;
 import com.backend.billiards_management.repositories.PurchaseInvoiceRepository;
+import com.backend.billiards_management.services.employee.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,18 +34,19 @@ public class PurchaseInvoiceServiceImpl implements PurchaseInvoiceService {
     private final ModelMapper modelMapper;
     private final EmployeeRepository employeeRepository;
     private final ProductRepository productRepository;
+    private final EmployeeService  employeeService;
     @Override
     public PurchaseInvoiceRes createPurchaseInvoice(PurchaseInvoiceReq req) {
-        Employee employee = employeeRepository.findById(req.getEmployeeId())
-                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Cannot find employee with id: " + req.getEmployeeId()));
+        Employee employee = employeeRepository.findById(employeeService.getMyProfile().getId())
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Cannot find employee"));
 
         PurchaseInvoice invoice = PurchaseInvoice.builder()
                 .employee(employee)
-                .importDate(req.getImportDate() != null ? req.getImportDate() : LocalDateTime.now())
+                .importDate(LocalDateTime.now())
+                .purchaseDetails(new ArrayList<>())
                 .build();
 
         BigDecimal totalAmount = BigDecimal.ZERO;
-
         for(PurchaseDetailReq detailReq : req.getDetails()) {
             Product product = productRepository.findById((long) detailReq.getProductId())
                     .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Cannot find product with id: " + detailReq.getProductId()));
@@ -67,6 +70,7 @@ public class PurchaseInvoiceServiceImpl implements PurchaseInvoiceService {
             BigDecimal subTotal = detailReq.getImportPrice().multiply(BigDecimal.valueOf(detailReq.getQuantity()));
             totalAmount = totalAmount.add(subTotal);
         }
+//        invoice.setPurchaseDetails(purchaseDetails);
         invoice.setTotalAmount(totalAmount);
 
         PurchaseInvoice savedInvoice = purchaseInvoiceRepository.save(invoice);

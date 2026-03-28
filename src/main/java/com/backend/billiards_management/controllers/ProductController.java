@@ -19,37 +19,40 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
-public class ProductController {
+public class ProductController extends BaseController{
     private final ProductService productService;
 
-//    @PostMapping(value ="/upsert", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    public ResponseEntity<ApiResponse<ProductRes>> upsertProduct(
-//            @RequestPart("product")ProductUpsertReq req,
+    private static final Set<String> VALID_SORT_FIELDS = Set.of("id", "name","sellingPrice", "importPrice", "updatedAt", "createdAt");
+
+    @PostMapping(value ="/upsert", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<ProductRes>> upsertProduct(
+            @ModelAttribute ProductUpsertReq req
 //            @RequestPart("image") MultipartFile imageFile
-//            ) {
-//        ProductRes saveProduct = productService.upsertProduct(req, imageFile);
-//        return ResponseEntity.ok(ApiResponse.<ProductRes>builder()
-//                .status(HttpStatus.OK.value())
-//                .message("upsert product success")
-//                .body(saveProduct)
-//                .build()
-//        );
-//    }
-
-    @PostMapping(value = "/upsert", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> upsertProduct(
-            @RequestPart("product") String productJson,
-            @RequestPart("image") MultipartFile imageFile
-    ) throws Exception {
-
-        ProductUpsertReq req = new ObjectMapper().readValue(productJson, ProductUpsertReq.class);
-
-        return ResponseEntity.ok(productService.upsertProduct(req, imageFile));
+            ) {
+        ProductRes saveProduct = productService.upsertProduct(req);
+        return ResponseEntity.ok(ApiResponse.<ProductRes>builder()
+                .status(HttpStatus.OK.value())
+                .message("upsert product success")
+                .body(saveProduct)
+                .build()
+        );
     }
+
+//    @PostMapping(value = "/upsert", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ResponseEntity<?> upsertProduct(
+//            @RequestPart("product") String productJson,
+//            @RequestPart("image") MultipartFile imageFile
+//    ) throws Exception {
+//
+//        ProductUpsertReq req = new ObjectMapper().readValue(productJson, ProductUpsertReq.class);
+//
+//        return ResponseEntity.ok(productService.upsertProduct(req, imageFile));
+//    }
 
     @GetMapping("/{productId}")
     public ResponseEntity<ApiResponse<ProductRes>> getProductById(@PathVariable Integer productId) {
@@ -66,7 +69,7 @@ public class ProductController {
     public ResponseEntity<ApiResponse<Page<ProductRes>>> getAllProducts(
             @PageableDefault(page = 0, size = 10) Pageable pageable
     ) {
-
+//        pageable = PageableUtils.sanitize(pageable, "id", VALID_SORT_FIELDS);
         Page<ProductRes> products = productService.getAllProducts(pageable);
 
         return ResponseEntity.ok(

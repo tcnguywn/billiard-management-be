@@ -17,10 +17,10 @@ import java.util.List;
 @Builder
 public class PurchaseInvoiceReq {
 
-    @NotNull(message = "MNV khong duoc de trong")
-    private Integer employeeId;
+//    @NotNull(message = "MNV khong duoc de trong")
+//    private Integer employeeId;
 
-    private LocalDateTime importDate;
+//    private LocalDateTime importDate;
 
     @NotEmpty(message = "Danh sach chi tiet khong duoc de trong")
     private List<PurchaseDetailReq> details;
