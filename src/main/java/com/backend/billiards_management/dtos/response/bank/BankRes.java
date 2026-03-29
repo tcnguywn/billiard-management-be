@@ -12,14 +12,10 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BankRes {
-    private int id;
-    private String bankBin;
     private String bankAccountNo;
     private String bankAccountName;
     private boolean bankStatus;
     private String bankName;
     private String bankShortName;
     private String bankLogo;
-    private Date createdAt;
-    private Date updatedAt;
 }

@@ -14,10 +14,6 @@ public class UpdateInvoiceReq {
     private LocalDateTime endTime;
     private String status;
     private String paymentMethod;
-    private BigDecimal serviceAmount;
-    private BigDecimal productAmount;
-    private BigDecimal taxAmount;
-    private BigDecimal totalAmount;
     private int voucherId;
     private int employeeId;
     private int billiardTableId;

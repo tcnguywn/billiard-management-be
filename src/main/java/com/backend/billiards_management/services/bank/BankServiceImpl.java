@@ -129,16 +129,12 @@ public class BankServiceImpl implements BankService {
 
     private BankRes mapToRes(Bank bank) {
         return BankRes.builder()
-                .id(bank.getId())
-                .bankBin(bank.getBankBin())
                 .bankAccountNo(bank.getBankAccountNo())
                 .bankAccountName(bank.getBankAccountName())
                 .bankStatus(bank.isBankStatus())
                 .bankName(bank.getBankName())
                 .bankShortName(bank.getBankShortName())
                 .bankLogo(bank.getBankLogo())
-                .createdAt(bank.getCreatedAt())
-                .updatedAt(bank.getUpdatedAt())
                 .build();
     }
 }

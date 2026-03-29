@@ -92,7 +92,7 @@ public class ProductServiceImpl implements ProductService{
         }
         else {
             Product finalProduct = product;
-            UploadImage existingImage = imageRepository.findById(product.getImage().getId())
+            UploadImage existingImage = imageRepository.findById(req.getImageId())
                     .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,
                             "Cannot find image with id: " + finalProduct.getImage().getId()));
             product.setImage(existingImage);

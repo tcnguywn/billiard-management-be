@@ -4,10 +4,10 @@ import com.backend.billiards_management.dtos.request.bank.CreateBankReq;
 import com.backend.billiards_management.dtos.request.bank.UpdateBankReq;
 import com.backend.billiards_management.dtos.response.ApiResponse;
 import com.backend.billiards_management.dtos.response.bank.BankRes;
-import com.backend.billiards_management.dtos.response.bank.DataObjectResponse;
 import com.backend.billiards_management.dtos.response.bank.ShortVietQRRes;
 import com.backend.billiards_management.services.bank.BankService;
 import com.backend.billiards_management.services.bank.VietQRService;
+import jakarta.ws.rs.Path;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -50,7 +50,7 @@ public class BankController {
     }
 
     @GetMapping("/{bankId}")
-    public ResponseEntity<ApiResponse<BankRes>> getBankById(@RequestParam Integer bankId) {
+    public ResponseEntity<ApiResponse<BankRes>> getBankById(@PathVariable Integer bankId) {
         BankRes bankRes = bankService.getBankById(bankId);
         return ResponseEntity.ok(
                 ApiResponse.<BankRes>builder()

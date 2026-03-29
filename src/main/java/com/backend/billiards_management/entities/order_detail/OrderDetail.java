@@ -36,10 +36,6 @@ public class OrderDetail extends BaseEntity {
     private LocalDateTime endTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "invoice_id")
-    private Invoice invoice;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
 }

@@ -1,5 +1,6 @@
 package com.backend.billiards_management.services.invoice;
 
+import com.backend.billiards_management.dtos.constant.TableType;
 import com.backend.billiards_management.dtos.request.invoice.CreateInvoiceReq;
 import com.backend.billiards_management.dtos.request.invoice.UpdateInvoiceReq;
 import com.backend.billiards_management.dtos.response.invoice.InvoiceRes;
@@ -8,18 +9,27 @@ import com.backend.billiards_management.entities.employee.Employee;
 import com.backend.billiards_management.entities.invoice.Invoice;
 import com.backend.billiards_management.entities.invoice.enums.PaymentMethod;
 import com.backend.billiards_management.entities.invoice.enums.PaymentStatus;
+import com.backend.billiards_management.entities.order_detail.OrderDetail;
+import com.backend.billiards_management.entities.product_category.enums.ProductCategoryType;
 import com.backend.billiards_management.entities.voucher.Voucher;
+import com.backend.billiards_management.entities.voucher.enums.VoucherType;
 import com.backend.billiards_management.exceptions.AppException;
 import com.backend.billiards_management.exceptions.ErrorCode;
-import com.backend.billiards_management.repositories.EmployeeRepository;
-import com.backend.billiards_management.repositories.InvoiceRepository;
-import com.backend.billiards_management.repositories.TableRepository;
-import com.backend.billiards_management.repositories.VoucherRepository;
+import com.backend.billiards_management.repositories.*;
+import com.backend.billiards_management.entities.price_list.PriceList;
+import com.backend.billiards_management.services.bank.VietQRService;
+import com.backend.billiards_management.dtos.response.bank.ShortVietQRRes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -30,6 +40,12 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final EmployeeRepository employeeRepository;
     private final TableRepository tableRepository;
     private final VoucherRepository voucherRepository;
+    private final OrderDetailRepository orderDetailRepository;
+    private final PricelistRepository pricelistRepository;
+    private final VietQRService vietQRService;
+
+    // Tỷ lệ thuế (10%)
+    private static final BigDecimal TAX_RATE = new BigDecimal("0.10");
 
     @Override
     @Transactional
@@ -44,27 +60,10 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,
                         "Cannot find billiard table with id: " + req.getBilliardTableId()));
 
-        // Tìm voucher nếu có
-        Voucher voucher = null;
-        if (req.getVoucherId() != 0) {
-            voucher = voucherRepository.findById((long) req.getVoucherId())
-                    .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,
-                            "Cannot find voucher with id: " + req.getVoucherId()));
-        }
-
-        // Parse payment method
-        PaymentMethod paymentMethod = parsePaymentMethod(req.getPaymentMethod());
 
         Invoice invoice = Invoice.builder()
                 .startTime(req.getStartTime())
-                .endTime(req.getEndTime())
                 .status(PaymentStatus.UNPAID)
-                .paymentMethod(paymentMethod)
-                .serviceAmount(req.getServiceAmount())
-                .productAmount(req.getProductAmount())
-                .taxAmount(req.getTaxAmount())
-                .totalAmount(req.getTotalAmount())
-                .voucher(voucher)
                 .employee(employee)
                 .billiardTable(billiardTable)
                 .build();
@@ -84,7 +83,6 @@ public class InvoiceServiceImpl implements InvoiceService {
             throw new AppException(ErrorCode.NOT_FOUND, "Invoice with id " + req.getId() + " has been deleted");
         }
 
-        // Cập nhật employee nếu có
         if (req.getEmployeeId() != 0) {
             Employee employee = employeeRepository.findById(req.getEmployeeId())
                     .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,
@@ -92,7 +90,6 @@ public class InvoiceServiceImpl implements InvoiceService {
             invoice.setEmployee(employee);
         }
 
-        // Cập nhật billiard table nếu có
         if (req.getBilliardTableId() != 0) {
             BilliardTable billiardTable = tableRepository.findById(req.getBilliardTableId())
                     .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,
@@ -100,17 +97,14 @@ public class InvoiceServiceImpl implements InvoiceService {
             invoice.setBilliardTable(billiardTable);
         }
 
-        // Cập nhật voucher nếu có
+        Voucher voucher = null;
         if (req.getVoucherId() != 0) {
-            Voucher voucher = voucherRepository.findById((long) req.getVoucherId())
+            voucher = voucherRepository.findById((long) req.getVoucherId())
                     .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,
                             "Cannot find voucher with id: " + req.getVoucherId()));
             invoice.setVoucher(voucher);
         }
 
-        if (req.getStartTime() != null) {
-            invoice.setStartTime(req.getStartTime());
-        }
         if (req.getEndTime() != null) {
             invoice.setEndTime(req.getEndTime());
         }
@@ -120,21 +114,272 @@ public class InvoiceServiceImpl implements InvoiceService {
         if (req.getPaymentMethod() != null) {
             invoice.setPaymentMethod(parsePaymentMethod(req.getPaymentMethod()));
         }
-        if (req.getServiceAmount() != null) {
-            invoice.setServiceAmount(req.getServiceAmount());
-        }
-        if (req.getProductAmount() != null) {
-            invoice.setProductAmount(req.getProductAmount());
-        }
-        if (req.getTaxAmount() != null) {
-            invoice.setTaxAmount(req.getTaxAmount());
-        }
-        if (req.getTotalAmount() != null) {
-            invoice.setTotalAmount(req.getTotalAmount());
-        }
+
+        calculateInvoiceAmounts(invoice, voucher);
 
         Invoice updatedInvoice = invoiceRepository.save(invoice);
         return mapToRes(updatedInvoice);
+    }
+
+    private void calculateInvoiceAmounts(Invoice invoice, Voucher voucher) {
+        // Lấy danh sách order details của invoice - có thể null khi mới tạo
+        List<OrderDetail> orderDetails = invoice.getOrderDetails();
+        if (orderDetails == null) {
+            orderDetails = new ArrayList<>();
+        }
+
+        BigDecimal productAmount = BigDecimal.ZERO;
+        BigDecimal serviceAmount = BigDecimal.ZERO;
+
+        for (OrderDetail detail : orderDetails) {
+            // Bỏ qua nếu order detail bị xóa
+            if (detail.isDeleted()) {
+                continue;
+            }
+
+            // Bỏ qua nếu product hoặc product category là null
+            if (detail.getProduct() == null || detail.getProduct().getProductCategory() == null) {
+                continue;
+            }
+
+            if (detail.getProduct().getProductCategory().getType() == ProductCategoryType.RETAIL) {
+                if (detail.getPrice() != null && detail.getQuantity() != null) {
+                    BigDecimal lineTotal = detail.getPrice().multiply(BigDecimal.valueOf(detail.getQuantity()));
+                    productAmount = productAmount.add(lineTotal);
+                }
+            } else {
+                if (detail.getPrice() != null && detail.getStartTime() != null && detail.getEndTime() != null) {
+                    // Validate endTime > startTime
+                    if (detail.getEndTime().isAfter(detail.getStartTime())) {
+                        Duration duration = Duration.between(detail.getStartTime(), detail.getEndTime());
+                        long hours = duration.toHours();
+
+                        // Xử lý giờ lẻ (làm tròn lên)
+                        if (duration.toMinutesPart() > 0) {
+                            hours++;
+                        }
+
+                        BigDecimal lineTotal = detail.getPrice().multiply(BigDecimal.valueOf(hours));
+                        productAmount = productAmount.add(lineTotal);
+                    }
+                }
+            }
+        }
+
+        if (invoice.getStartTime() != null && invoice.getEndTime() != null && invoice.getBilliardTable() != null) {
+            // Validate endTime > startTime
+            if (invoice.getEndTime().isAfter(invoice.getStartTime())) {
+                serviceAmount = calculateServiceAmountByPriceList(
+                        invoice.getStartTime(),
+                        invoice.getEndTime(),
+                        invoice.getBilliardTable().getTableType()
+                );
+            }
+        }
+
+        invoice.setProductAmount(productAmount);
+        invoice.setServiceAmount(serviceAmount);
+
+        BigDecimal subTotal = productAmount.add(serviceAmount);
+
+        BigDecimal taxAmount = subTotal.multiply(TAX_RATE).setScale(2, RoundingMode.HALF_UP);
+        invoice.setTaxAmount(taxAmount);
+
+        BigDecimal totalBeforeDiscount = subTotal.add(taxAmount);
+
+        BigDecimal discountAmount = BigDecimal.ZERO;
+        if (voucher == null) {
+            voucher = invoice.getVoucher();
+        }
+
+        if (voucher != null && voucher.getValue() != null) {
+            discountAmount = calculateVoucherDiscount(voucher, totalBeforeDiscount);
+        }
+
+        BigDecimal totalAmount = totalBeforeDiscount.subtract(discountAmount);
+        if (totalAmount.compareTo(BigDecimal.ZERO) < 0) {
+            totalAmount = BigDecimal.ZERO;
+        }
+        invoice.setTotalAmount(totalAmount);
+    }
+
+    /**
+     * Tính số tiền giảm giá từ voucher
+     */
+    private BigDecimal calculateVoucherDiscount(Voucher voucher, BigDecimal totalAmount) {
+        if (voucher.getType() == VoucherType.PERCENTAGE) {
+            // Giảm theo phần trăm
+            BigDecimal discount = totalAmount.multiply(voucher.getValue())
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            // Kiểm tra giới hạn tối đa
+            if (voucher.getMaximumValue() != null && discount.compareTo(voucher.getMaximumValue()) > 0) {
+                discount = voucher.getMaximumValue();
+            }
+            return discount;
+        } else if (voucher.getType() == VoucherType.CASH) {
+            // Giảm số tiền cố định
+            return voucher.getValue();
+        }
+        return BigDecimal.ZERO;
+    }
+
+    /**
+     * Tính serviceAmount dựa trên PriceList với các khung giờ khác nhau
+     * @param startTime Thời gian bắt đầu
+     * @param endTime Thời gian kết thúc
+     * @param tableType Loại bàn
+     * @return Tổng số tiền cần thanh toán cho dịch vụ
+     */
+    private BigDecimal calculateServiceAmountByPriceList(LocalDateTime startTime, LocalDateTime endTime,
+                                                         TableType tableType) {
+        List<PriceList> priceLists = pricelistRepository.findByTableType(tableType);
+
+        if (priceLists.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal totalAmount = BigDecimal.ZERO;
+
+        // Convert LocalDateTime to Date for compatibility with PriceList
+        Date startDate = Date.from(startTime.atZone(ZoneId.systemDefault()).toInstant());
+        Date endDate = Date.from(endTime.atZone(ZoneId.systemDefault()).toInstant());
+
+        // Chuyển đổi sang milliseconds để dễ tính toán
+        long currentTime = startDate.getTime();
+        long endMillis = endDate.getTime();
+
+        // Xử lý từng phút trong khoảng thời gian
+        while (currentTime < endMillis) {
+            Date currentDate = new Date(currentTime);
+            boolean foundPriceList = false;
+            BigDecimal hourlyPrice = BigDecimal.ZERO;
+
+            // Tìm price list phù hợp với thời gian hiện tại
+            for (PriceList priceList : priceLists) {
+                if (isTimeInPriceRange(currentDate, priceList)) {
+                    hourlyPrice = priceList.getUnitPrice();
+                    foundPriceList = true;
+                    break;
+                }
+            }
+
+            if (!foundPriceList) {
+                // Nếu không có price list phù hợp, dùng giá mặc định hoặc throw exception
+                // Ở đây tôi sẽ dùng giá thấp nhất trong danh sách
+                hourlyPrice = priceLists.stream()
+                        .map(PriceList::getUnitPrice)
+                        .min(BigDecimal::compareTo)
+                        .orElse(BigDecimal.ZERO);
+            }
+
+            // Tính thời gian đến cuối khung giờ hiện tại hoặc đến endTime
+            long endOfCurrentPrice = findEndOfCurrentPriceRange(currentDate, priceLists);
+            long nextTransitionTime = Math.min(endOfCurrentPrice, endMillis);
+
+            // Tính số giờ/phút và cộng vào tổng
+            long durationMillis = nextTransitionTime - currentTime;
+            double durationHours = (double) durationMillis / (1000 * 60 * 60);
+
+            BigDecimal amountForPeriod = hourlyPrice.multiply(BigDecimal.valueOf(durationHours));
+            totalAmount = totalAmount.add(amountForPeriod);
+
+            // Chuyển sang khoảng thời gian tiếp theo
+            currentTime = nextTransitionTime;
+        }
+
+        return totalAmount.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * Kiểm tra xem thời gian hiện tại có nằm trong price range không
+     */
+    private boolean isTimeInPriceRange(Date currentTime, PriceList priceList) {
+        if (priceList.getStartTime() == null || priceList.getEndTime() == null) {
+            return false;
+        }
+
+        // Lấy giờ và phút từ currentTime
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.setTime(currentTime);
+        int currentHour = cal.get(java.util.Calendar.HOUR_OF_DAY);
+        int currentMinute = cal.get(java.util.Calendar.MINUTE);
+        int currentTotalMinutes = currentHour * 60 + currentMinute;
+
+        // Lấy giờ và phút từ startTime
+        cal.setTime(priceList.getStartTime());
+        int startHour = cal.get(java.util.Calendar.HOUR_OF_DAY);
+        int startMinute = cal.get(java.util.Calendar.MINUTE);
+        int startTotalMinutes = startHour * 60 + startMinute;
+
+        // Lấy giờ và phút từ endTime
+        cal.setTime(priceList.getEndTime());
+        int endHour = cal.get(java.util.Calendar.HOUR_OF_DAY);
+        int endMinute = cal.get(java.util.Calendar.MINUTE);
+        int endTotalMinutes = endHour * 60 + endMinute;
+
+        // Xử lý case qua ngày (ví dụ: 22:00 - 6:00)
+        if (endTotalMinutes < startTotalMinutes) {
+            // Range qua ngày: current phải >= start hoặc <= end
+            return currentTotalMinutes >= startTotalMinutes || currentTotalMinutes <= endTotalMinutes;
+        } else {
+            // Range thường trong ngày
+            return currentTotalMinutes >= startTotalMinutes && currentTotalMinutes < endTotalMinutes;
+        }
+    }
+
+    /**
+     * Tìm thời điểm kết thúc của price range hiện tại
+     */
+    private long findEndOfCurrentPriceRange(Date currentTime, List<PriceList> priceLists) {
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.setTime(currentTime);
+
+        // Tìm tất cả các price list và tìm thời điểm chuyển giao tiếp theo
+        long nextTransition = Long.MAX_VALUE;
+
+        for (PriceList priceList : priceLists) {
+            if (priceList.getStartTime() != null && priceList.getEndTime() != null) {
+                java.util.Calendar startCal = java.util.Calendar.getInstance();
+                startCal.setTime(priceList.getStartTime());
+                startCal.set(java.util.Calendar.YEAR, cal.get(java.util.Calendar.YEAR));
+                startCal.set(java.util.Calendar.MONTH, cal.get(java.util.Calendar.MONTH));
+                startCal.set(java.util.Calendar.DAY_OF_MONTH, cal.get(java.util.Calendar.DAY_OF_MONTH));
+
+                java.util.Calendar endCal = java.util.Calendar.getInstance();
+                endCal.setTime(priceList.getEndTime());
+                endCal.set(java.util.Calendar.YEAR, cal.get(java.util.Calendar.YEAR));
+                endCal.set(java.util.Calendar.MONTH, cal.get(java.util.Calendar.MONTH));
+                endCal.set(java.util.Calendar.DAY_OF_MONTH, cal.get(java.util.Calendar.DAY_OF_MONTH));
+
+                // Nếu endTime < startTime, nghĩa là range qua ngày
+                if (endCal.get(java.util.Calendar.HOUR_OF_DAY) * 60 + endCal.get(java.util.Calendar.MINUTE) <
+                    startCal.get(java.util.Calendar.HOUR_OF_DAY) * 60 + startCal.get(java.util.Calendar.MINUTE)) {
+                    // Nếu currentTime nằm trong range qua ngày, endCal là ngày hôm sau
+                    endCal.add(java.util.Calendar.DAY_OF_MONTH, 1);
+                }
+
+                // Kiểm tra nếu startTime của price list > currentTime
+                if (startCal.getTimeInMillis() > currentTime.getTime() && startCal.getTimeInMillis() < nextTransition) {
+                    nextTransition = startCal.getTimeInMillis();
+                }
+
+                // Kiểm tra nếu endTime của price list > currentTime
+                if (endCal.getTimeInMillis() > currentTime.getTime() && endCal.getTimeInMillis() < nextTransition) {
+                    nextTransition = endCal.getTimeInMillis();
+                }
+            }
+        }
+
+        // Nếu không tìm thấy transition, trả về cuối ngày
+        if (nextTransition == Long.MAX_VALUE) {
+            cal.set(java.util.Calendar.HOUR_OF_DAY, 23);
+            cal.set(java.util.Calendar.MINUTE, 59);
+            cal.set(java.util.Calendar.SECOND, 59);
+            cal.set(java.util.Calendar.MILLISECOND, 999);
+            nextTransition = cal.getTimeInMillis() + 1;
+        }
+
+        return nextTransition;
     }
 
     @Override
@@ -247,6 +492,20 @@ public class InvoiceServiceImpl implements InvoiceService {
             billiardTableName = invoice.getBilliardTable().getName();
         }
 
+        // Generate QR code for CREDIT_CARD payment
+        String qrCode = null;
+        String qrImageUrl = null;
+        if (invoice.getPaymentMethod() == PaymentMethod.CREDIT_CARD) {
+            try {
+                ShortVietQRRes qrData = vietQRService.getShortVietQR(invoice.getId());
+                qrCode = qrData.getQrCode();
+                qrImageUrl = qrData.getQrImageUrl();
+            } catch (Exception e) {
+                // Log error but don't fail the entire response
+                System.err.println("Failed to generate QR code: " + e.getMessage());
+            }
+        }
+
         return InvoiceRes.builder()
                 .id(invoice.getId())
                 .startTime(invoice.getStartTime())
@@ -263,6 +522,8 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .employeeName(employeeName)
                 .billiardTableId(billiardTableId)
                 .billiardTableName(billiardTableName)
+                .qrCode(qrCode)
+                .qrImageUrl(qrImageUrl)
                 .createdAt(invoice.getCreatedAt())
                 .updatedAt(invoice.getUpdatedAt())
                 .build();

@@ -50,7 +50,7 @@ public class VoucherController {
         );
     }
 
-    @PatchMapping("/{voucherId}")
+    @PatchMapping("/")
     public ResponseEntity<ApiResponse<VoucherResponse>> updateVoucher(@RequestParam Long voucherId,
                                                                       @RequestBody UpdateVoucherRequest request) {
         return ResponseEntity.ok(
@@ -63,7 +63,7 @@ public class VoucherController {
     }
 
     @GetMapping("/validate_vouchers")
-    public ResponseEntity<ApiResponse<List<VoucherResponse>>> getActiveVouchers(@RequestParam BigDecimal totalBillAmount) {
+    public ResponseEntity<ApiResponse<List<VoucherResponse>>> getActiveVouchers(@RequestBody BigDecimal totalBillAmount) {
         return ResponseEntity.ok(
                 ApiResponse.<List<VoucherResponse>>builder()
                         .status(200)
@@ -74,7 +74,7 @@ public class VoucherController {
     }
 
     @DeleteMapping("/{voucherId}")
-    public ResponseEntity<ApiResponse<String>> deleteVoucher(@RequestParam Long voucherId) {
+    public ResponseEntity<ApiResponse<String>> deleteVoucher(@PathVariable Long voucherId) {
         voucherService.deleteVoucher(voucherId);
         return ResponseEntity.ok(
                 ApiResponse.<String>builder()

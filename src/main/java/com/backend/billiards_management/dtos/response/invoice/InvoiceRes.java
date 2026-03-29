@@ -38,4 +38,8 @@ public class InvoiceRes {
 
     private Date createdAt;
     private Date updatedAt;
+
+    // QR Code info (for CREDIT_CARD payment)
+    private String qrCode;
+    private String qrImageUrl;
 }

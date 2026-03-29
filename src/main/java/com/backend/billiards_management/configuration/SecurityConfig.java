@@ -27,6 +27,8 @@ public class SecurityConfig {
                                 .requestMatchers("/api/v1/auth/login").permitAll()
                                 .requestMatchers("/api/v1/manager/**").permitAll()
                                 .requestMatchers("/api/v1/employees/**").permitAll()
+                                .requestMatchers("/api/v1/banks/**").permitAll()
+                                .requestMatchers("/api/v1/invoices/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));

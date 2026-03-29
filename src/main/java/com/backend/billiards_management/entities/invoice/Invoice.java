@@ -12,7 +12,6 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -65,6 +64,4 @@ public class Invoice extends BaseEntity {
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "invoice_id")
     private List<OrderDetail> orderDetails;
-
-
 }
