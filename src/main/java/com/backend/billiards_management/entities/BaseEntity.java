@@ -16,7 +16,7 @@ import java.util.Date;
 public abstract class BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)

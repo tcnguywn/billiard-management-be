@@ -4,6 +4,7 @@ import com.backend.billiards_management.dtos.request.billiard_table.BilliardTabl
 import com.backend.billiards_management.dtos.request.billiard_table.UpdateTableReq;
 import com.backend.billiards_management.dtos.response.ApiResponse;
 import com.backend.billiards_management.dtos.response.billiard_table.TableRes;
+import com.backend.billiards_management.dtos.response.billiard_table.TableResWithInvoice;
 import com.backend.billiards_management.services.table.TableService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,9 +24,6 @@ import java.util.Set;
 @RequestMapping("/api/v1/tables")
 @RequiredArgsConstructor
 public class TableController extends BaseController {
-
-    private static final Set<String> VALID_SORT_FIELDS = Set.of("id", "name", "updatedAt", "createdAt");
-
 
     private final TableService tableService;
 
@@ -73,6 +71,19 @@ public class TableController extends BaseController {
                         .status(HttpStatus.OK.value())
                         .message("Get tables success")
                         .body(tableService.getTables(pageable))
+                        .build()
+        );
+    }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<ApiResponse<Page<TableResWithInvoice>>> getTablesWithActiveStatus(
+            @PageableDefault(page = 0, size = 10) Pageable pageable
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.<Page<TableResWithInvoice>>builder()
+                        .status(HttpStatus.OK.value())
+                        .message("Get tables with active status success")
+                        .body(tableService.getTablesWithActiveStatus(pageable))
                         .build()
         );
     }

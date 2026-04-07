@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 public class TableRes {
-    private Long id;
+    private Integer id;
     private String name;
     private TableStatus status;
     private String imageUrl;

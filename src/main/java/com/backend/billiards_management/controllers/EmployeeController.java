@@ -69,7 +69,7 @@ public class EmployeeController extends BaseController{
         );
     }
 
-    @PostMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<EmployeeRes>> updateEmployee(
             @ModelAttribute("employee") UpdateEmployeeReq req) {
         return ResponseEntity.ok(
@@ -81,7 +81,7 @@ public class EmployeeController extends BaseController{
         );
     }
 
-    @PostMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<EmployeeRes>> updateProfileEmployee(
             @ModelAttribute("employee") UpdateProfileReq req
 //            @RequestPart("image") MultipartFile imageFile

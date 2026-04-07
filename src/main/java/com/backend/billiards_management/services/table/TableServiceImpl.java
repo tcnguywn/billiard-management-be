@@ -3,29 +3,40 @@ package com.backend.billiards_management.services.table;
 import com.backend.billiards_management.dtos.request.billiard_table.BilliardTableReq;
 import com.backend.billiards_management.dtos.request.billiard_table.UpdateTableReq;
 import com.backend.billiards_management.dtos.response.billiard_table.TableRes;
+import com.backend.billiards_management.dtos.response.billiard_table.TableResWithInvoice;
 import com.backend.billiards_management.dtos.response.image.UploadRes;
+import com.backend.billiards_management.dtos.response.invoice.InvoiceActiveRes;
 import com.backend.billiards_management.entities.billiard_table.BilliardTable;
+import com.backend.billiards_management.entities.employee.Employee;
 import com.backend.billiards_management.entities.image.UploadImage;
+import com.backend.billiards_management.entities.invoice.Invoice;
+import com.backend.billiards_management.entities.invoice.enums.PaymentStatus;
 import com.backend.billiards_management.exceptions.AppException;
 import com.backend.billiards_management.exceptions.ErrorCode;
+import com.backend.billiards_management.repositories.InvoiceRepository;
 import com.backend.billiards_management.repositories.TableRepository;
 import com.backend.billiards_management.services.uploadImage.UploadImageService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-@Repository
+@Service
 @RequiredArgsConstructor
+@Slf4j
 public class TableServiceImpl implements TableService {
     private final TableRepository tableRepository;
 
     private final ModelMapper modelMapper;
 
     private final UploadImageService uploadImageService;
+
+    private final InvoiceRepository invoiceRepository;
     @Override
     public TableRes getTableById(int id) {
         return modelMapper.map(tableRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,"Table not found")), TableRes.class);
@@ -41,6 +52,42 @@ public class TableServiceImpl implements TableService {
             return res;
         });
     }
+
+    @Override
+    public Page<TableResWithInvoice> getTablesWithActiveStatus(Pageable pageable) {
+        Page<BilliardTable> tables = tableRepository.findAll(pageable);
+        log.info("get all table in function getTablesWithAcitiveStatus");
+        return tables.map(table -> {
+            TableResWithInvoice res = new TableResWithInvoice();
+            res.setId(table.getId());
+            res.setName(table.getName());
+            res.setStatus(table.getStatus());
+
+            // Tìm hoá đơn hoạt động (chưa thanh toán) của bàn
+            Invoice activeInvoice = invoiceRepository.findByStatusAndDeletedFalse(PaymentStatus.UNPAID)
+                    .stream()
+                    .filter(invoice -> invoice.getBilliardTable() != null &&
+                            invoice.getBilliardTable().getId().equals(table.getId()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (activeInvoice != null) {
+                InvoiceActiveRes invoiceRes = new InvoiceActiveRes();
+                invoiceRes.setId(activeInvoice.getId());
+                invoiceRes.setStartAt(activeInvoice.getStartTime());
+
+                Employee employee = activeInvoice.getEmployee();
+                if (employee != null) {
+                    invoiceRes.setEmployeeName(employee.getFirstName() + " " + employee.getLastName());
+                }
+
+                res.setActiveInvoice(invoiceRes);
+            }
+
+            return res;
+        });
+    }
+
 
     @Override
     public TableRes createTable(BilliardTableReq req) {
