@@ -1,0 +1,276 @@
+openapi: 3.0.0
+info:
+  title: Voucher API
+  description: API for managing discount vouchers
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /api/v1/vouchers/:
+    get:
+      summary: Get Active Vouchers
+      description: Retrieve all active vouchers
+      operationId: getActiveVouchers
+      tags:
+        - Voucher
+      responses:
+        '200':
+          description: Vouchers retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVoucherList'
+
+    post:
+      summary: Create Voucher
+      operationId: createVoucher
+      tags:
+        - Voucher
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVoucherRequest'
+      responses:
+        '200':
+          description: Voucher created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVoucher'
+
+  /api/v1/vouchers/{voucherId}:
+    get:
+      summary: Get Voucher by ID
+      operationId: getVoucherById
+      tags:
+        - Voucher
+      parameters:
+        - name: voucherId
+          in: query
+          required: true
+          description: Voucher ID (passed as @RequestParam despite path variable in URL)
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Voucher retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVoucher'
+
+    patch:
+      summary: Update Voucher
+      operationId: updateVoucher
+      tags:
+        - Voucher
+      parameters:
+        - name: voucherId
+          in: query
+          required: true
+          description: Voucher ID (passed as @RequestParam)
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateVoucherRequest'
+      responses:
+        '200':
+          description: Voucher updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVoucher'
+
+    delete:
+      summary: Delete Voucher
+      operationId: deleteVoucher
+      tags:
+        - Voucher
+      parameters:
+        - name: voucherId
+          in: query
+          required: true
+          description: Voucher ID (passed as @RequestParam)
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Voucher deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseMessage'
+
+  /api/v1/vouchers/validate_vouchers:
+    get:
+      summary: Get Applicable Vouchers by Bill Amount
+      description: Retrieve all vouchers applicable for a given total bill amount
+      operationId: validateVouchers
+      tags:
+        - Voucher
+      parameters:
+        - name: totalBillAmount
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+          description: Total bill amount to check voucher applicability
+      responses:
+        '200':
+          description: Applicable vouchers retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVoucherList'
+
+components:
+  schemas:
+    CreateVoucherRequest:
+      type: object
+      properties:
+        voucherType:
+          type: string
+          enum: [CASH, PERCENTAGE]
+          example: PERCENTAGE
+        value:
+          type: number
+          format: double
+          description: Discount value (percentage or fixed amount)
+          example: 10.00
+        source:
+          type: string
+          enum: [AI, MANUAL]
+          example: MANUAL
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, EXPIRED]
+          example: ACTIVE
+        startTime:
+          type: string
+          format: date-time
+          description: Maps to entity startDate field
+          example: '2024-01-01T00:00:00'
+        endTime:
+          type: string
+          format: date-time
+          description: Maps to entity endDate field
+          example: '2024-12-31T23:59:59'
+        quantity:
+          type: integer
+          example: 100
+        minimumAmount:
+          type: number
+          format: double
+          description: Minimum bill amount to apply this voucher
+          example: 50000.00
+        maximumValue:
+          type: number
+          format: double
+          description: Maximum discount cap
+          example: 200000.00
+
+    UpdateVoucherRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, EXPIRED]
+          example: INACTIVE
+        startTime:
+          type: string
+          format: date-time
+          example: '2024-01-01T00:00:00'
+        endTime:
+          type: string
+          format: date-time
+          example: '2024-12-31T23:59:59'
+        quantity:
+          type: integer
+          example: 50
+
+    VoucherResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Unique voucher code (voucherCode field in entity)
+          example: VC-ABC123
+        voucherType:
+          type: string
+          enum: [CASH, PERCENTAGE]
+          example: PERCENTAGE
+        value:
+          type: number
+          format: double
+          example: 10.00
+        source:
+          type: string
+          enum: [AI, MANUAL]
+          example: MANUAL
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, EXPIRED]
+          example: ACTIVE
+        startTime:
+          type: string
+          format: date-time
+          example: '2024-01-01T00:00:00'
+        endTime:
+          type: string
+          format: date-time
+          example: '2024-12-31T23:59:59'
+        quantity:
+          type: integer
+          example: 100
+        minimumAmount:
+          type: number
+          format: double
+          example: 50000.00
+
+    ApiResponseVoucher:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Create voucher success
+        body:
+          $ref: '#/components/schemas/VoucherResponse'
+
+    ApiResponseVoucherList:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Get all vouchers success
+        body:
+          type: array
+          items:
+            $ref: '#/components/schemas/VoucherResponse'
+
+    ApiResponseMessage:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Delete voucher success

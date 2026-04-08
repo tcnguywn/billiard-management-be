@@ -1,0 +1,352 @@
+openapi: 3.0.0
+info:
+  title: Table API
+  description: API for managing billiard tables
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /api/v1/tables:
+    post:
+      summary: Create Table
+      description: Create a new billiard table (multipart/form-data with optional image)
+      operationId: createTable
+      tags:
+        - Table
+      requestBody:
+        description: Table details
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BilliardTableReq'
+      responses:
+        '200':
+          description: Table created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseTable'
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+
+    put:
+      summary: Update Table
+      description: Update an existing billiard table (multipart/form-data)
+      operationId: updateTable
+      tags:
+        - Table
+      requestBody:
+        description: Table update details
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UpdateTableReq'
+      responses:
+        '200':
+          description: Table updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseTable'
+        '400':
+          description: Invalid request
+        '404':
+          description: Table not found
+
+    get:
+      summary: Get All Tables
+      description: Retrieve all billiard tables with pagination
+      operationId: getTables
+      tags:
+        - Table
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+          description: Page number
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 10
+          description: Page size
+        - name: sort
+          in: query
+          schema:
+            type: string
+          description: Sort criteria
+      responses:
+        '200':
+          description: Tables retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseTablePage'
+        '500':
+          description: Internal server error
+
+    delete:
+      summary: Delete Table
+      description: Delete a table by ID
+      operationId: deleteTable
+      tags:
+        - Table
+      parameters:
+        - name: tableId
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: Table ID
+      responses:
+        '200':
+          description: Table deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseMessage'
+        '404':
+          description: Table not found
+
+  /api/v1/tables/{tableId}:
+    get:
+      summary: Get Table by ID
+      description: Retrieve a specific billiard table by ID
+      operationId: getTableById
+      tags:
+        - Table
+      parameters:
+        - name: tableId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Table ID
+      responses:
+        '200':
+          description: Table retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseTable'
+        '404':
+          description: Table not found
+        '500':
+          description: Internal server error
+
+  /api/v1/tables/dashboard:
+    get:
+      summary: Get Tables with Active Invoice Status (Dashboard)
+      description: Retrieve all billiard tables with their active invoice info for the dashboard
+      operationId: getTablesWithActiveStatus
+      tags:
+        - Table
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+          description: Page number
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 10
+          description: Page size
+      responses:
+        '200':
+          description: Tables retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseTableWithInvoicePage'
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    BilliardTableReq:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Table 1
+        status:
+          type: string
+          enum: [AVAILABLE, RESERVED, MAINTENANCE]
+          example: AVAILABLE
+        tableType:
+          type: string
+          enum: [POOL, SNOOKER, CAROM]
+          example: POOL
+        imageFile:
+          type: string
+          format: binary
+          description: Table image file (optional)
+
+    UpdateTableReq:
+      type: object
+      description: Extends BilliardTableReq with id
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Table 1
+        status:
+          type: string
+          enum: [AVAILABLE, RESERVED, MAINTENANCE]
+          example: AVAILABLE
+        tableType:
+          type: string
+          enum: [POOL, SNOOKER, CAROM]
+          example: POOL
+        imageFile:
+          type: string
+          format: binary
+          description: Table image file (optional)
+
+    TableRes:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Table 1
+        status:
+          type: string
+          enum: [AVAILABLE, RESERVED, MAINTENANCE]
+          example: AVAILABLE
+        imageUrl:
+          type: string
+          example: https://example.com/image.jpg
+
+    InvoiceActiveRes:
+      type: object
+      description: Brief active invoice info embedded in table response
+      properties:
+        id:
+          type: integer
+          example: 42
+        startAt:
+          type: string
+          format: date-time
+          example: '2024-01-15T10:00:00'
+        employeeName:
+          type: string
+          example: John Doe
+
+    TableResWithInvoice:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Table 1
+        status:
+          type: string
+          enum: [AVAILABLE, RESERVED, MAINTENANCE]
+          example: RESERVED
+        activeInvoice:
+          $ref: '#/components/schemas/InvoiceActiveRes'
+          nullable: true
+          description: Non-null if the table currently has an active (UNPAID) invoice
+
+    PageInfo:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          example: 20
+        totalPages:
+          type: integer
+          example: 2
+        size:
+          type: integer
+          example: 10
+        number:
+          type: integer
+          example: 0
+        first:
+          type: boolean
+          example: true
+        last:
+          type: boolean
+          example: false
+        empty:
+          type: boolean
+          example: false
+
+    ApiResponseTable:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Create table success
+        body:
+          $ref: '#/components/schemas/TableRes'
+
+    ApiResponseTablePage:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Get tables success
+        body:
+          type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/TableRes'
+            pageable:
+              $ref: '#/components/schemas/PageInfo'
+
+    ApiResponseTableWithInvoicePage:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Get tables with active status success
+        body:
+          type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/TableResWithInvoice'
+            pageable:
+              $ref: '#/components/schemas/PageInfo'
+
+    ApiResponseMessage:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Delete table success

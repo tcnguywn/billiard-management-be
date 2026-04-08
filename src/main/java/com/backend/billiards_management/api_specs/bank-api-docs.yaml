@@ -1,0 +1,310 @@
+openapi: 3.0.0
+info:
+  title: Bank API
+  description: API for managing banks and VietQR information
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /api/v1/banks:
+    post:
+      summary: Create Bank
+      description: Create a new bank account
+      operationId: createBank
+      tags:
+        - Bank
+      requestBody:
+        description: Bank creation details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBankReq'
+      responses:
+        '201':
+          description: Bank created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseBank'
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+
+    put:
+      summary: Update Bank
+      description: Update an existing bank account
+      operationId: updateBank
+      tags:
+        - Bank
+      requestBody:
+        description: Bank update details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBankReq'
+      responses:
+        '200':
+          description: Bank updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseBank'
+        '400':
+          description: Invalid request
+        '404':
+          description: Bank not found
+
+    get:
+      summary: Get All Banks
+      description: Retrieve all banks
+      operationId: getAllBanks
+      tags:
+        - Bank
+      responses:
+        '200':
+          description: Banks retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseBankList'
+        '500':
+          description: Internal server error
+
+  /api/v1/banks/{bankId}:
+    get:
+      summary: Get Bank by ID
+      description: Retrieve a specific bank by ID
+      operationId: getBankById
+      tags:
+        - Bank
+      parameters:
+        - name: bankId
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: Bank ID (passed as @RequestParam)
+      responses:
+        '200':
+          description: Bank retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseBank'
+        '404':
+          description: Bank not found
+        '500':
+          description: Internal server error
+
+    delete:
+      summary: Delete Bank
+      description: Delete a bank by ID
+      operationId: deleteBank
+      tags:
+        - Bank
+      parameters:
+        - name: bankId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Bank ID
+      responses:
+        '200':
+          description: Bank deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseMessage'
+        '404':
+          description: Bank not found
+
+  /api/v1/banks/active:
+    get:
+      summary: Get Active Bank
+      description: Retrieve the currently active bank
+      operationId: getActiveBank
+      tags:
+        - Bank
+      responses:
+        '200':
+          description: Active bank retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseBank'
+        '404':
+          description: No active bank found
+
+  /api/v1/banks/vietqr/{id}:
+    get:
+      summary: Get VietQR Data
+      description: Retrieve VietQR QR code data for a specific bank
+      operationId: getVietQRDataObject
+      tags:
+        - VietQR
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Bank ID
+      responses:
+        '200':
+          description: VietQR data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVietQR'
+        '404':
+          description: Bank not found
+
+components:
+  schemas:
+    CreateBankReq:
+      type: object
+      properties:
+        bankBin:
+          type: string
+          description: Bank BIN code (unique)
+          example: '970436'
+        bankAccountNo:
+          type: string
+          example: '1234567890'
+        bankAccountName:
+          type: string
+          example: NGUYEN VAN A
+        bankStatus:
+          type: boolean
+          example: true
+        bankName:
+          type: string
+          example: Vietcombank
+        bankShortName:
+          type: string
+          example: VCB
+        bankLogo:
+          type: string
+          example: https://example.com/vcb-logo.png
+
+    UpdateBankReq:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        bankBin:
+          type: string
+          example: '970436'
+        bankAccountNo:
+          type: string
+          example: '1234567890'
+        bankAccountName:
+          type: string
+          example: NGUYEN VAN A
+        bankStatus:
+          type: boolean
+          example: true
+        employeeId:
+          type: integer
+          example: 1
+
+    BankRes:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        bankBin:
+          type: string
+          example: '970436'
+        bankAccountNo:
+          type: string
+          example: '1234567890'
+        bankAccountName:
+          type: string
+          example: NGUYEN VAN A
+        bankStatus:
+          type: boolean
+          example: true
+        bankName:
+          type: string
+          example: Vietcombank
+        bankShortName:
+          type: string
+          example: VCB
+        bankLogo:
+          type: string
+          example: https://example.com/vcb-logo.png
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ShortVietQRRes:
+      type: object
+      properties:
+        qrCode:
+          type: string
+          description: QR code data string
+          example: '00020101021238...'
+        qrImageUrl:
+          type: string
+          description: URL to the QR code image
+          example: https://img.vietqr.io/image/VCB-1234567890-compact.png
+
+    ApiResponseBank:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 201
+        message:
+          type: string
+          example: Bank created successfully
+        body:
+          $ref: '#/components/schemas/BankRes'
+
+    ApiResponseBankList:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Get all banks successfully
+        body:
+          type: array
+          items:
+            $ref: '#/components/schemas/BankRes'
+
+    ApiResponseVietQR:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Get VietQR data object successfully
+        body:
+          $ref: '#/components/schemas/ShortVietQRRes'
+
+    ApiResponseMessage:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Bank deleted successfully

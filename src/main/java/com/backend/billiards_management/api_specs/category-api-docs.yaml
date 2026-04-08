@@ -1,0 +1,140 @@
+openapi: 3.0.0
+info:
+  title: Category API
+  description: API for managing product categories
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /api/v1/categories:
+    post:
+      summary: Add Category
+      description: Create a new product category
+      operationId: addCategory
+      tags:
+        - Category
+      requestBody:
+        description: Category details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryReq'
+      responses:
+        '200':
+          description: Category added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseCategory'
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+
+    get:
+      summary: Get All Categories
+      description: Retrieve all product categories
+      operationId: getAllCategories
+      tags:
+        - Category
+      responses:
+        '200':
+          description: Categories retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseCategoryList'
+        '500':
+          description: Internal server error
+
+  /api/v1/categories/{categoryId}:
+    get:
+      summary: Get Category by ID
+      description: Retrieve a specific category by ID
+      operationId: getCategoryById
+      tags:
+        - Category
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Category ID
+      responses:
+        '200':
+          description: Category retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseCategory'
+        '404':
+          description: Category not found
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    CategoryReq:
+      type: object
+      properties:
+        categoryName:
+          type: string
+          example: Beverages
+        type:
+          type: string
+          enum: [RENTAL, RETAIL]
+          example: RETAIL
+
+    ProductCategory:
+      type: object
+      description: Returns the ProductCategory entity directly (no separate response DTO)
+      properties:
+        id:
+          type: integer
+          example: 1
+        categoryName:
+          type: string
+          example: Beverages
+        type:
+          type: string
+          enum: [RENTAL, RETAIL]
+          example: RETAIL
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        deleted:
+          type: boolean
+          example: false
+
+    ApiResponseCategory:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Add category success
+        body:
+          $ref: '#/components/schemas/ProductCategory'
+
+    ApiResponseCategoryList:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Get all categories success
+        body:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductCategory'

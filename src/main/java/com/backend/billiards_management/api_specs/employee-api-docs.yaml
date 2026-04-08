@@ -1,0 +1,365 @@
+openapi: 3.0.0
+info:
+  title: Employee API
+  description: API for managing employees
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /api/v1/employees:
+    post:
+      summary: Create Employee
+      description: Create a new employee (also creates Keycloak account)
+      operationId: createEmployee
+      tags:
+        - Employee
+      requestBody:
+        description: Employee details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEmployeeReq'
+      responses:
+        '200':
+          description: Employee created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseEmployee'
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+
+    get:
+      summary: Get All Employees
+      description: Retrieve all employees with pagination
+      operationId: getAllEmployees
+      tags:
+        - Employee
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+          description: Page number
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 10
+          description: Page size
+        - name: sort
+          in: query
+          schema:
+            type: string
+          description: Sort criteria (id, name, updatedAt, createdAt)
+      responses:
+        '200':
+          description: Employees retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseEmployeePage'
+        '500':
+          description: Internal server error
+
+  /api/v1/employees/{employeeId}:
+    get:
+      summary: Get Employee by ID
+      description: Retrieve a specific employee by ID
+      operationId: getEmployeeById
+      tags:
+        - Employee
+      parameters:
+        - name: employeeId
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: Employee ID (passed as @RequestParam)
+      responses:
+        '200':
+          description: Employee retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseEmployee'
+        '404':
+          description: Employee not found
+        '500':
+          description: Internal server error
+
+    delete:
+      summary: Delete Employee
+      description: Delete an employee by ID
+      operationId: deleteEmployee
+      tags:
+        - Employee
+      parameters:
+        - name: employeeId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Employee ID
+      responses:
+        '200':
+          description: Employee deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseMessage'
+        '404':
+          description: Employee not found
+
+  /api/v1/employees/update:
+    put:
+      summary: Update Employee
+      description: Update an existing employee (multipart/form-data)
+      operationId: updateEmployee
+      tags:
+        - Employee
+      requestBody:
+        description: Employee update details
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UpdateEmployeeReq'
+      responses:
+        '200':
+          description: Employee updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseEmployee'
+        '400':
+          description: Invalid request
+        '404':
+          description: Employee not found
+
+  /api/v1/employees/profile:
+    get:
+      summary: Get My Profile
+      description: Get the current logged-in employee profile
+      operationId: getProfile
+      tags:
+        - Employee
+      responses:
+        '200':
+          description: Profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseEmployee'
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+    put:
+      summary: Update Profile
+      description: Update the current logged-in employee profile (multipart/form-data)
+      operationId: updateProfileEmployee
+      tags:
+        - Employee
+      requestBody:
+        description: Profile update details
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileReq'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseEmployee'
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+components:
+  schemas:
+    CreateEmployeeReq:
+      type: object
+      properties:
+        username:
+          type: string
+          example: john.doe
+        password:
+          type: string
+          format: password
+          example: secret123
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        phoneNumber:
+          type: string
+          example: '0123456789'
+        role:
+          type: string
+          enum: [MANAGER, EMPLOYEE]
+          example: EMPLOYEE
+
+    UpdateEmployeeReq:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        phoneNumber:
+          type: string
+          example: '0123456789'
+        role:
+          type: string
+          enum: [MANAGER, EMPLOYEE]
+          example: EMPLOYEE
+        isActive:
+          type: boolean
+          example: true
+
+    UpdateProfileReq:
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        phoneNumber:
+          type: string
+          example: '0123456789'
+        image:
+          type: string
+          format: binary
+          description: Profile image file
+
+    EmployeeRes:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        keycloakId:
+          type: string
+          example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        phoneNumber:
+          type: string
+          example: '0123456789'
+        role:
+          type: string
+          enum: [MANAGER, EMPLOYEE]
+          example: EMPLOYEE
+        imageUrl:
+          type: string
+          example: https://example.com/image.jpg
+        isActive:
+          type: boolean
+          example: true
+
+    PageInfo:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          example: 50
+        totalPages:
+          type: integer
+          example: 5
+        size:
+          type: integer
+          example: 10
+        number:
+          type: integer
+          example: 0
+        first:
+          type: boolean
+          example: true
+        last:
+          type: boolean
+          example: false
+        empty:
+          type: boolean
+          example: false
+
+    ApiResponseEmployee:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: create employee success
+        body:
+          $ref: '#/components/schemas/EmployeeRes'
+
+    ApiResponseEmployeePage:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: get all products success
+        body:
+          type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/EmployeeRes'
+            pageable:
+              $ref: '#/components/schemas/PageInfo'
+
+    ApiResponseMessage:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: delete employee success

@@ -1,0 +1,251 @@
+openapi: 3.0.0
+info:
+  title: Purchase Invoice API
+  description: API for managing product import/purchase invoices
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /api/v1/purchase-invoices:
+    post:
+      summary: Create Purchase Invoice
+      description: Create a new purchase invoice for importing products into stock
+      operationId: createPurchaseInvoice
+      tags:
+        - Purchase Invoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseInvoiceReq'
+      responses:
+        '200':
+          description: Purchase invoice created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePurchaseInvoice'
+        '400':
+          description: Invalid request (empty details list)
+        '500':
+          description: Internal server error
+
+    get:
+      summary: Get All Purchase Invoices
+      description: Retrieve all purchase invoices with pagination
+      operationId: getAllPurchaseInvoices
+      tags:
+        - Purchase Invoice
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: sort
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Purchase invoices retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePurchaseInvoicePage'
+
+    delete:
+      summary: Delete Purchase Invoice
+      description: Delete a purchase invoice by ID
+      operationId: deletePurchaseInvoice
+      tags:
+        - Purchase Invoice
+      parameters:
+        - name: invoiceId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Purchase invoice deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseMessage'
+
+  /api/v1/purchase-invoices/{invoiceId}:
+    get:
+      summary: Get Purchase Invoice by ID
+      operationId: getPurchaseInvoiceById
+      tags:
+        - Purchase Invoice
+      parameters:
+        - name: invoiceId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Purchase invoice retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePurchaseInvoice'
+        '404':
+          description: Invoice not found
+
+components:
+  schemas:
+    PurchaseInvoiceReq:
+      type: object
+      required:
+        - details
+      properties:
+        details:
+          type: array
+          description: List of product import details (must not be empty)
+          items:
+            $ref: '#/components/schemas/PurchaseDetailReq'
+
+    PurchaseDetailReq:
+      type: object
+      required:
+        - productId
+        - quantity
+        - importPrice
+      properties:
+        productId:
+          type: integer
+          example: 1
+        quantity:
+          type: integer
+          minimum: 1
+          example: 10
+        importPrice:
+          type: number
+          format: double
+          minimum: 0
+          example: 30000.00
+
+    PurchaseInvoiceRes:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        totalAmount:
+          type: number
+          format: double
+          example: 300000.00
+        importDate:
+          type: string
+          format: date-time
+          example: '2024-01-15T10:30:00'
+        employeeId:
+          type: integer
+          example: 1
+        employeeName:
+          type: string
+          example: John Doe
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurchaseDetailRes'
+
+    PurchaseDetailRes:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        productId:
+          type: integer
+          example: 1
+        productName:
+          type: string
+          example: Coffee
+        quantity:
+          type: integer
+          example: 10
+        importPrice:
+          type: number
+          format: double
+          example: 30000.00
+        subTotal:
+          type: number
+          format: double
+          description: quantity * importPrice
+          example: 300000.00
+
+    PageInfo:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          example: 100
+        totalPages:
+          type: integer
+          example: 10
+        size:
+          type: integer
+          example: 10
+        number:
+          type: integer
+          example: 0
+        first:
+          type: boolean
+          example: true
+        last:
+          type: boolean
+          example: false
+
+    ApiResponsePurchaseInvoice:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Create purchase invoice success
+        body:
+          $ref: '#/components/schemas/PurchaseInvoiceRes'
+
+    ApiResponsePurchaseInvoicePage:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Get all purchase invoices success
+        body:
+          type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/PurchaseInvoiceRes'
+            pageable:
+              $ref: '#/components/schemas/PageInfo'
+
+    ApiResponseMessage:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Delete purchase invoice success

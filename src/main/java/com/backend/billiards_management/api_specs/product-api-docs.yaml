@@ -1,0 +1,284 @@
+openapi: 3.0.0
+info:
+  title: Product API
+  description: API for managing products
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /api/v1/products/upsert:
+    post:
+      summary: Create or Update Product
+      description: Create a new product or update an existing one (multipart/form-data with optional image)
+      operationId: upsertProduct
+      tags:
+        - Product
+      requestBody:
+        description: Product details
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProductUpsertReq'
+      responses:
+        '200':
+          description: Product created/updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseProduct'
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+
+  /api/v1/products:
+    get:
+      summary: Get All Products
+      description: Retrieve all products with pagination
+      operationId: getAllProducts
+      tags:
+        - Product
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+          description: Page number
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 10
+          description: Page size
+        - name: sort
+          in: query
+          schema:
+            type: string
+          description: Sort criteria (id, name, sellingPrice, importPrice, updatedAt, createdAt)
+      responses:
+        '200':
+          description: Products retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseProductPage'
+        '500':
+          description: Internal server error
+
+    delete:
+      summary: Delete Product
+      description: Delete a product by ID
+      operationId: deleteProduct
+      tags:
+        - Product
+      parameters:
+        - name: productId
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: Product ID
+      responses:
+        '200':
+          description: Product deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseMessage'
+        '404':
+          description: Product not found
+
+  /api/v1/products/{productId}:
+    get:
+      summary: Get Product by ID
+      description: Retrieve a specific product by ID
+      operationId: getProductById
+      tags:
+        - Product
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Product ID
+      responses:
+        '200':
+          description: Product retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseProduct'
+        '404':
+          description: Product not found
+        '500':
+          description: Internal server error
+
+  /api/v1/products/search:
+    get:
+      summary: Search Products
+      description: Search products by keyword
+      operationId: searchProduct
+      tags:
+        - Product
+      parameters:
+        - name: keyword
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Search keyword
+      responses:
+        '200':
+          description: Products found successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseProductList'
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    ProductUpsertReq:
+      type: object
+      description: multipart/form-data request for creating or updating a product
+      properties:
+        id:
+          type: integer
+          description: Product ID (required for update, omit for create)
+          example: 1
+        name:
+          type: string
+          example: Coffee
+        sellingPrice:
+          type: number
+          format: double
+          example: 50000.00
+        importPrice:
+          type: number
+          format: double
+          example: 30000.00
+        initStock:
+          type: integer
+          description: Initial stock quantity
+          example: 100
+        imageId:
+          type: integer
+          description: ID of existing uploaded image (optional)
+          example: 5
+        categoryId:
+          type: integer
+          example: 1
+        image:
+          type: string
+          format: binary
+          description: Product image file (optional)
+
+    ProductRes:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Coffee
+        price:
+          type: number
+          format: double
+          description: Selling price
+          example: 50000.00
+        stock:
+          type: integer
+          example: 100
+        imageUrl:
+          type: string
+          example: https://example.com/image.jpg
+        categoryName:
+          type: string
+          example: Beverages
+
+    PageInfo:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          example: 50
+        totalPages:
+          type: integer
+          example: 5
+        size:
+          type: integer
+          example: 10
+        number:
+          type: integer
+          example: 0
+        first:
+          type: boolean
+          example: true
+        last:
+          type: boolean
+          example: false
+        empty:
+          type: boolean
+          example: false
+
+    ApiResponseProduct:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: upsert product success
+        body:
+          $ref: '#/components/schemas/ProductRes'
+
+    ApiResponseProductList:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: search product success
+        body:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductRes'
+
+    ApiResponseProductPage:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: get all products success
+        body:
+          type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/ProductRes'
+            pageable:
+              $ref: '#/components/schemas/PageInfo'
+
+    ApiResponseMessage:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Delete product success

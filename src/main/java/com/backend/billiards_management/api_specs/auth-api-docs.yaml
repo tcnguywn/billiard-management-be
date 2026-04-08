@@ -1,0 +1,112 @@
+openapi: 3.0.0
+info:
+  title: Auth API
+  description: Authentication API for managing user login
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /api/v1/auth/login:
+    post:
+      summary: User Login
+      description: Authenticate user with username and password via Keycloak
+      operationId: login
+      tags:
+        - Authentication
+      requestBody:
+        description: Login credentials
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseAuth'
+        '401':
+          description: Invalid credentials
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: admin
+        password:
+          type: string
+          format: password
+          example: password123
+
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          example: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+        refreshToken:
+          type: string
+          example: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+        expiresIn:
+          type: integer
+          format: int64
+          example: 300
+        employee:
+          $ref: '#/components/schemas/EmployeeRes'
+
+    EmployeeRes:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        keycloakId:
+          type: string
+          example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        phoneNumber:
+          type: string
+          example: '0123456789'
+        role:
+          type: string
+          enum: [MANAGER, EMPLOYEE]
+          example: MANAGER
+        imageUrl:
+          type: string
+          example: https://example.com/image.jpg
+        isActive:
+          type: boolean
+          example: true
+
+    ApiResponseAuth:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Login success
+        body:
+          $ref: '#/components/schemas/AuthResponse'

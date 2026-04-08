@@ -1,0 +1,339 @@
+openapi: 3.0.0
+info:
+  title: Invoice API
+  description: API for managing billiard session invoices
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /api/v1/invoices:
+    post:
+      summary: Create Invoice
+      description: Create a new billiard session invoice (status starts as UNPAID)
+      operationId: createInvoice
+      tags:
+        - Invoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInvoiceReq'
+      responses:
+        '201':
+          description: Invoice created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseInvoice'
+        '400':
+          description: Invalid request
+
+    put:
+      summary: Update Invoice
+      description: Update an existing invoice (e.g. close session and mark as PAID)
+      operationId: updateInvoice
+      tags:
+        - Invoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateInvoiceReq'
+      responses:
+        '200':
+          description: Invoice updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseInvoice'
+        '404':
+          description: Invoice not found
+
+    get:
+      summary: Get All Invoices
+      operationId: getAllInvoices
+      tags:
+        - Invoice
+      responses:
+        '200':
+          description: Invoices retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseInvoiceList'
+
+  /api/v1/invoices/{invoiceId}:
+    get:
+      summary: Get Invoice by ID
+      operationId: getInvoiceById
+      tags:
+        - Invoice
+      parameters:
+        - name: invoiceId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Invoice retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseInvoice'
+        '404':
+          description: Invoice not found
+
+    delete:
+      summary: Delete Invoice
+      operationId: deleteInvoice
+      tags:
+        - Invoice
+      parameters:
+        - name: invoiceId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Invoice deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseMessage'
+
+  /api/v1/invoices/status/{status}:
+    get:
+      summary: Get Invoices by Status
+      operationId: getInvoicesByStatus
+      tags:
+        - Invoice
+      parameters:
+        - name: status
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [PAID, UNPAID]
+      responses:
+        '200':
+          description: Invoices retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseInvoiceList'
+
+  /api/v1/invoices/employee/{employeeId}:
+    get:
+      summary: Get Invoices by Employee
+      operationId: getInvoicesByEmployeeId
+      tags:
+        - Invoice
+      parameters:
+        - name: employeeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Invoices retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseInvoiceList'
+
+components:
+  schemas:
+    CreateInvoiceReq:
+      type: object
+      properties:
+        startTime:
+          type: string
+          format: date-time
+          example: '2024-01-15T10:00:00'
+        endTime:
+          type: string
+          format: date-time
+          example: '2024-01-15T12:00:00'
+        paymentMethod:
+          type: string
+          enum: [CASH, CREDIT_CARD]
+          example: CASH
+        serviceAmount:
+          type: number
+          format: double
+          example: 100000.00
+        productAmount:
+          type: number
+          format: double
+          example: 50000.00
+        taxAmount:
+          type: number
+          format: double
+          example: 15000.00
+        totalAmount:
+          type: number
+          format: double
+          example: 165000.00
+        voucherId:
+          type: integer
+          example: 1
+        employeeId:
+          type: integer
+          example: 1
+        billiardTableId:
+          type: integer
+          example: 1
+
+    UpdateInvoiceReq:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        startTime:
+          type: string
+          format: date-time
+          example: '2024-01-15T10:00:00'
+        endTime:
+          type: string
+          format: date-time
+          example: '2024-01-15T12:00:00'
+        status:
+          type: string
+          enum: [PAID, UNPAID]
+          example: PAID
+        paymentMethod:
+          type: string
+          enum: [CASH, CREDIT_CARD]
+          example: CASH
+        serviceAmount:
+          type: number
+          format: double
+          example: 100000.00
+        productAmount:
+          type: number
+          format: double
+          example: 50000.00
+        taxAmount:
+          type: number
+          format: double
+          example: 15000.00
+        totalAmount:
+          type: number
+          format: double
+          example: 165000.00
+        voucherId:
+          type: integer
+          example: 1
+        employeeId:
+          type: integer
+          example: 1
+        billiardTableId:
+          type: integer
+          example: 1
+
+    InvoiceRes:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        startTime:
+          type: string
+          format: date-time
+          example: '2024-01-15T10:00:00'
+        endTime:
+          type: string
+          format: date-time
+          example: '2024-01-15T12:00:00'
+        status:
+          type: string
+          enum: [PAID, UNPAID]
+          example: UNPAID
+        paymentMethod:
+          type: string
+          enum: [CASH, CREDIT_CARD]
+          example: CASH
+        serviceAmount:
+          type: number
+          format: double
+          example: 100000.00
+        productAmount:
+          type: number
+          format: double
+          example: 50000.00
+        taxAmount:
+          type: number
+          format: double
+          example: 15000.00
+        totalAmount:
+          type: number
+          format: double
+          example: 165000.00
+        voucherId:
+          type: integer
+          example: 1
+        voucherCode:
+          type: string
+          example: VOUCHER2024
+        employeeId:
+          type: integer
+          example: 1
+        employeeName:
+          type: string
+          example: John Doe
+        billiardTableId:
+          type: integer
+          example: 1
+        billiardTableName:
+          type: string
+          example: Table 1
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ApiResponseInvoice:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Invoice created successfully
+        body:
+          $ref: '#/components/schemas/InvoiceRes'
+
+    ApiResponseInvoiceList:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Get all invoices successfully
+        body:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoiceRes'
+
+    ApiResponseMessage:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Invoice deleted successfully
