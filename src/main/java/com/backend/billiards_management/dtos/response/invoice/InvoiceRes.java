@@ -1,5 +1,6 @@
 package com.backend.billiards_management.dtos.response.invoice;
 
+import com.backend.billiards_management.dtos.response.order_detail.OrderDetailRes;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Builder
@@ -23,6 +25,9 @@ public class InvoiceRes {
     private BigDecimal productAmount;
     private BigDecimal taxAmount;
     private BigDecimal totalAmount;
+
+    // Danh sách chi tiết hóa đơn
+    private List<OrderDetailRes> orderDetails;
 
     // Voucher info
     private int voucherId;

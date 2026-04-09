@@ -62,6 +62,7 @@ public class TableServiceImpl implements TableService {
             res.setId(table.getId());
             res.setName(table.getName());
             res.setStatus(table.getStatus());
+            res.setTableType(table.getTableType());
 
             // Tìm hoá đơn hoạt động (chưa thanh toán) của bàn
             Invoice activeInvoice = invoiceRepository.findByStatusAndDeletedFalse(PaymentStatus.UNPAID)

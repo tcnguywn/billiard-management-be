@@ -15,10 +15,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.beans.PropertyEditorSupport;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/tables")
@@ -88,13 +84,14 @@ public class TableController extends BaseController {
         );
     }
 
-    @DeleteMapping()
-    public ResponseEntity<ApiResponse<String>> deleteTable(@RequestParam int tableId) {
+    @DeleteMapping(value = "/{tableId}")
+    public ResponseEntity<ApiResponse<String>> deleteTable(@PathVariable("tableId") int tableId) {
         tableService.deleteTable(tableId);
         return ResponseEntity.ok(
                 ApiResponse.<String>builder()
                         .status(HttpStatus.OK.value())
                         .message("Delete table success")
+                        .body(null)
                         .build()
         );
     }

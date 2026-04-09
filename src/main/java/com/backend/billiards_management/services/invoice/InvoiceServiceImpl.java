@@ -3,11 +3,15 @@ package com.backend.billiards_management.services.invoice;
 import com.backend.billiards_management.dtos.request.invoice.CreateInvoiceReq;
 import com.backend.billiards_management.dtos.request.invoice.UpdateInvoiceReq;
 import com.backend.billiards_management.dtos.response.invoice.InvoiceRes;
+import com.backend.billiards_management.dtos.response.order_detail.OrderDetailRes;
 import com.backend.billiards_management.entities.billiard_table.BilliardTable;
+import com.backend.billiards_management.entities.billiard_table.enums.TableStatus;
 import com.backend.billiards_management.entities.employee.Employee;
 import com.backend.billiards_management.entities.invoice.Invoice;
 import com.backend.billiards_management.entities.invoice.enums.PaymentMethod;
 import com.backend.billiards_management.entities.invoice.enums.PaymentStatus;
+import com.backend.billiards_management.entities.order_detail.OrderDetail;
+import com.backend.billiards_management.entities.product_category.enums.ProductCategoryType;
 import com.backend.billiards_management.entities.voucher.Voucher;
 import com.backend.billiards_management.exceptions.AppException;
 import com.backend.billiards_management.exceptions.ErrorCode;
@@ -70,6 +74,8 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .build();
 
         Invoice savedInvoice = invoiceRepository.save(invoice);
+        billiardTable.setStatus(TableStatus.RESERVED);
+        tableRepository.save(billiardTable); 
         return mapToRes(savedInvoice);
     }
 
@@ -114,7 +120,12 @@ public class InvoiceServiceImpl implements InvoiceService {
         if (req.getEndTime() != null) {
             invoice.setEndTime(req.getEndTime());
         }
-        if (req.getStatus() != null) {
+        if (req.getStatus() != null && req.getStatus().equals("PAID") && invoice.getStatus() == PaymentStatus.UNPAID) {
+            BilliardTable table = tableRepository.findById(invoice.getBilliardTable().getId())
+                    .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,
+                            "Cannot find billiard table with id: " + invoice.getBilliardTable().getId()));
+            table.setStatus(TableStatus.AVAILABLE);
+            tableRepository.save(table);
             invoice.setStatus(parsePaymentStatus(req.getStatus()));
         }
         if (req.getPaymentMethod() != null) {
@@ -138,6 +149,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
+    @Transactional
     public InvoiceRes getInvoiceById(int id) {
         Invoice invoice = invoiceRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,
@@ -151,6 +163,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
+    @Transactional
     public List<InvoiceRes> getAllInvoices() {
         List<Invoice> invoices = invoiceRepository.findByDeletedFalse();
         List<InvoiceRes> invoiceResList = new ArrayList<>();
@@ -174,7 +187,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice.setDeleted(true);
         invoiceRepository.save(invoice);
     }
-
+    @Transactional
     @Override
     public List<InvoiceRes> getInvoicesByStatus(String status) {
         PaymentStatus paymentStatus = parsePaymentStatus(status);
@@ -247,6 +260,30 @@ public class InvoiceServiceImpl implements InvoiceService {
             billiardTableName = invoice.getBilliardTable().getName();
         }
 
+        List<OrderDetailRes> detailResList = new ArrayList<>();
+        if (invoice.getOrderDetails() != null) {
+            for (var d : invoice.getOrderDetails()) {
+                if (d == null || d.isDeleted()) continue;
+                var product = d.getProduct();
+                var productCategory = product != null ? product.getProductCategory() : null;
+                var type = productCategory != null ? productCategory.getType() : null;
+
+                detailResList.add(OrderDetailRes.builder()
+                        .id(d.getId())
+                        .invoiceId(invoice.getId())
+                        .productId(product != null ? product.getId() : null)
+                        .productName(product != null ? product.getName() : null)
+                        .price(d.getPrice())
+                        .quantity(d.getQuantity())
+                        .note(d.getNote())
+                        .startTime(d.getStartTime())
+                        .endTime(d.getEndTime())
+                        .categoryType(type)
+                        .deleted(d.isDeleted())
+                        .build());
+            }
+        }
+
         return InvoiceRes.builder()
                 .id(invoice.getId())
                 .startTime(invoice.getStartTime())
@@ -257,6 +294,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .productAmount(invoice.getProductAmount())
                 .taxAmount(invoice.getTaxAmount())
                 .totalAmount(invoice.getTotalAmount())
+                .orderDetails(detailResList)
                 .voucherId(voucherId)
                 .voucherCode(voucherCode)
                 .employeeId(employeeId)
