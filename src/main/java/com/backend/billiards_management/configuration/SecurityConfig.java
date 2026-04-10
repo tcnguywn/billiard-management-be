@@ -26,7 +26,7 @@ public class SecurityConfig {
 //                                        TODO: XOÁ ĐI SAU KHI TEST
                                         "/api/v1/dashboard/**",
                                         "/api/v1/invoices/**",
-                                        "/api/v1/order-detail/**"
+                                        "/api/v1/order-details/**"
                                 ).permitAll()
                                 .requestMatchers("/api/v1/auth/login").permitAll()
                                 .requestMatchers("/api/v1/manager/**").permitAll()

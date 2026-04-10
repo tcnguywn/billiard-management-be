@@ -10,8 +10,6 @@ import com.backend.billiards_management.entities.employee.Employee;
 import com.backend.billiards_management.entities.invoice.Invoice;
 import com.backend.billiards_management.entities.invoice.enums.PaymentMethod;
 import com.backend.billiards_management.entities.invoice.enums.PaymentStatus;
-import com.backend.billiards_management.entities.order_detail.OrderDetail;
-import com.backend.billiards_management.entities.product_category.enums.ProductCategoryType;
 import com.backend.billiards_management.entities.voucher.Voucher;
 import com.backend.billiards_management.exceptions.AppException;
 import com.backend.billiards_management.exceptions.ErrorCode;
@@ -23,7 +21,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service

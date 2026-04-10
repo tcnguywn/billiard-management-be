@@ -1,8 +1,13 @@
 package com.backend.billiards_management.repositories;
 
+import com.backend.billiards_management.dtos.response.order_detail.TopProductRes;
 import com.backend.billiards_management.entities.order_detail.OrderDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Repository
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, Integer> {

@@ -23,13 +23,13 @@ public interface DashboardRepository extends JpaRepository<Invoice, Long> {
                     COALESCE(SUM(total_amount) FILTER (
                         WHERE created_at >= date_trunc('day', CURRENT_TIMESTAMP)
                           AND created_at < date_trunc('day', CURRENT_TIMESTAMP) + INTERVAL '1 day'
-                          AND status = 1
+                          AND status = 'PAID'
                     ), 0) AS today_revenue,
         
                     COALESCE(SUM(total_amount) FILTER (
                         WHERE created_at >= date_trunc('day', CURRENT_TIMESTAMP) - INTERVAL '7 day'
                           AND created_at < date_trunc('day', CURRENT_TIMESTAMP) - INTERVAL '6 day'
-                          AND status = 1
+                          AND status = 'PAID'
                     ), 0) AS last_week_revenue
                 FROM invoices
             )
@@ -48,14 +48,14 @@ RevenueSummary getRevenueSummary();
                 WITH current_week AS (
                     SELECT AVG(EXTRACT(EPOCH FROM (end_time - start_time))) /3600 AS avg_playtime
                     FROM invoices
-                    WHERE status = 1
+                    WHERE status = 'PAID'
                       AND start_time >= date_trunc('week', CURRENT_DATE)
                       AND start_time < date_trunc('week', CURRENT_DATE) + INTERVAL '1 week'
                 ),
                 last_week AS (
                     SELECT AVG(EXTRACT(EPOCH FROM (end_time - start_time))) /3600 AS avg_playtime
                     FROM invoices
-                    WHERE status = 1
+                    WHERE status = 'PAID'
                       AND start_time >= date_trunc('week', CURRENT_DATE) - INTERVAL '1 week'
                       AND start_time < date_trunc('week', CURRENT_DATE)
                 )
@@ -74,14 +74,14 @@ RevenueSummary getRevenueSummary();
                 WITH current_week AS (
                     SELECT SUM(total_amount) AS revenue
                     FROM invoices
-                    WHERE status = 1
+                    WHERE status = 'PAID'
                       AND created_at >= date_trunc('week', CURRENT_DATE)
                       AND created_at < date_trunc('week', CURRENT_DATE) + INTERVAL '1 week'
                 ),
                 last_week AS (
                     SELECT SUM(total_amount) AS revenue
                     FROM invoices
-                    WHERE status = 1
+                    WHERE status = 'PAID'
                       AND created_at >= date_trunc('week', CURRENT_DATE) - INTERVAL '1 week'
                       AND created_at < date_trunc('week', CURRENT_DATE)
                 )
@@ -111,7 +111,7 @@ RevenueSummary getRevenueSummary();
             SELECT TO_CHAR(DATE(created_at), 'YYYY-MM-DD') AS "dateLabel",
                    SUM(total_amount) AS revenue
             FROM invoices
-            WHERE status = 1
+            WHERE status = 'PAID'
               AND created_at >= :from
               AND created_at < :to
             GROUP BY DATE(created_at)
@@ -126,7 +126,7 @@ RevenueSummary getRevenueSummary();
             SELECT ('Week ' || (((EXTRACT(DAY FROM created_at) - 1) / 7)::int + 1)) AS "dateLabel",
                     SUM(total_amount) AS revenue
             FROM invoices
-            WHERE status = 1
+            WHERE status = 'PAID'
               AND created_at >= :from
               AND created_at < :to
             GROUP BY "dateLabel"
@@ -141,7 +141,7 @@ RevenueSummary getRevenueSummary();
             SELECT ('Month ' || EXTRACT(MONTH FROM created_at)) AS "dateLabel",
                     SUM(total_amount) AS revenue
             FROM invoices
-            WHERE status = 1
+            WHERE status = 'PAID'
               AND created_at >= :from
               AND created_at < :to
             GROUP BY "dateLabel"
