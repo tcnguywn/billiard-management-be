@@ -29,6 +29,10 @@ import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -85,7 +89,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         Invoice savedInvoice = invoiceRepository.save(invoice);
         billiardTable.setStatus(TableStatus.RESERVED);
-        tableRepository.save(billiardTable); 
+        tableRepository.save(billiardTable);
         return mapToRes(savedInvoice);
     }
 
@@ -209,6 +213,33 @@ public class InvoiceServiceImpl implements InvoiceService {
                         "Cannot find employee with id: " + employeeId));
 
         List<Invoice> invoices = invoiceRepository.findByEmployeeAndDeletedFalse(employee);
+        List<InvoiceRes> invoiceResList = new ArrayList<>();
+        for (Invoice invoice : invoices) {
+            invoiceResList.add(mapToRes(invoice));
+        }
+        return invoiceResList;
+    }
+
+    @Override
+    public List<InvoiceRes> getInvoicesByRange(LocalDate startDate, LocalDate endDate) {
+        if (startDate == null || endDate == null) {
+            throw new AppException(ErrorCode.BAD_REQUEST, "Start date and end date cannot be null");
+        }
+
+        if (startDate.isAfter(endDate)) {
+            throw new AppException(ErrorCode.BAD_REQUEST, "Start date cannot be after end date");
+        }
+
+        if (ChronoUnit.DAYS.between(startDate, endDate) > 30) {
+            throw new AppException(ErrorCode.BAD_REQUEST, "Date range cannot exceed 30 days");
+        }
+
+        ZoneId zone = ZoneId.systemDefault();
+
+        Date start = Date.from(startDate.atStartOfDay(zone).toInstant());
+        Date end = Date.from(endDate.atTime(LocalTime.MAX).atZone(zone).toInstant());
+
+        List<Invoice> invoices = invoiceRepository.findByDeletedFalseAndCreatedAtBetween(start, end);
         List<InvoiceRes> invoiceResList = new ArrayList<>();
         for (Invoice invoice : invoices) {
             invoiceResList.add(mapToRes(invoice));

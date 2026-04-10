@@ -6,10 +6,12 @@ import com.backend.billiards_management.dtos.response.ApiResponse;
 import com.backend.billiards_management.dtos.response.invoice.InvoiceRes;
 import com.backend.billiards_management.services.invoice.InvoiceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -110,6 +112,21 @@ public class InvoiceController {
                         .status(HttpStatus.OK.value())
                         .message("confirm invoice successfully")
                         .body(null)
+                        .build()
+        );
+    }
+
+    @GetMapping("/range")
+    public ResponseEntity<ApiResponse<List<InvoiceRes>>> getInvoicesByRange(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+    ) {
+        List<InvoiceRes> invoices = invoiceService.getInvoicesByRange(startDate, endDate);
+        return ResponseEntity.ok(
+                ApiResponse.<List<InvoiceRes>>builder()
+                        .status(HttpStatus.OK.value())
+                        .message("")
+                        .body(invoices)
                         .build()
         );
     }

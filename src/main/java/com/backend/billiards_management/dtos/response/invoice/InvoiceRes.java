@@ -43,4 +43,5 @@ public class InvoiceRes {
 
     private Date createdAt;
     private Date updatedAt;
+    private List<OrderDetailRes> orderDetailResList;
 }
