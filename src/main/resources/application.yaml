@@ -31,6 +31,8 @@ spring:
 server:
   port: 9090
 
+forecast-client:
+  base-url: http://localhost:8000/api/v1
 
 
 keycloak:
