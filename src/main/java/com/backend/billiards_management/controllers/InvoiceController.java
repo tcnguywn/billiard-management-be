@@ -101,4 +101,16 @@ public class InvoiceController {
                         .build()
         );
     }
+
+    @PostMapping("/{invoiceId}")
+    public ResponseEntity<ApiResponse<String>> confirmInvoice(@PathVariable int invoiceId) {
+        invoiceService.confirmInvoice(invoiceId);
+        return ResponseEntity.ok(
+                ApiResponse.<String>builder()
+                        .status(HttpStatus.OK.value())
+                        .message("confirm invoice successfully")
+                        .body(null)
+                        .build()
+        );
+    }
 }

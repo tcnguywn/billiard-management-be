@@ -14,4 +14,5 @@ public interface InvoiceService {
     void deleteInvoice(int id);
     List<InvoiceRes> getInvoicesByStatus(String status);
     List<InvoiceRes> getInvoicesByEmployeeId(int employeeId);
+    void confirmInvoice(int id);
 }

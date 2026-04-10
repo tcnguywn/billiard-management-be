@@ -4,7 +4,7 @@ info:
   description: API for managing banks and VietQR information
   version: 1.0.0
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:9090
     description: Local development server
 
 paths:
