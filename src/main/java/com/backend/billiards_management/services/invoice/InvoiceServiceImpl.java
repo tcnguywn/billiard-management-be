@@ -125,6 +125,8 @@ public class InvoiceServiceImpl implements InvoiceService {
             invoice.setPaymentMethod(parsePaymentMethod(req.getPaymentMethod()));
         }
         invoice.setEndTime(LocalDateTime.now());
+
+        invoice.setStatus(PaymentStatus.PAID);
         if (invoice.getStatus() == PaymentStatus.PAID)
             calculateInvoiceAmounts(invoice, voucher);
         BilliardTable table = invoice.getBilliardTable();
