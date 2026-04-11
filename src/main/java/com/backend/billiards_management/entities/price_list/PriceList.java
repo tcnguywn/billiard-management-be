@@ -31,4 +31,7 @@ public class PriceList extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "table_type")
     private TableType tableType;
+//
+//    @Column(name = "price_list_name")
+//    private String priceListName;
 }

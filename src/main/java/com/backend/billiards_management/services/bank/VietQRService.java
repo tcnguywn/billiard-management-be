@@ -8,16 +8,21 @@ import com.backend.billiards_management.dtos.response.bank.ShortVietQRRes;
 import com.backend.billiards_management.dtos.response.bank.VietQRResponse;
 import com.backend.billiards_management.entities.bank.Bank;
 import com.backend.billiards_management.entities.invoice.Invoice;
+import com.backend.billiards_management.entities.invoice.enums.PaymentStatus;
 import com.backend.billiards_management.exceptions.AppException;
 import com.backend.billiards_management.exceptions.ErrorCode;
 import com.backend.billiards_management.repositories.BankRepository;
 import com.backend.billiards_management.repositories.InvoiceRepository;
+import com.backend.billiards_management.services.invoice.InvoiceService;
+import com.backend.billiards_management.services.invoice.InvoiceServiceImpl;
 import com.cloudinary.utils.ObjectUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import org.springframework.http.*;
+
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,6 +36,7 @@ public class VietQRService {
     private final BankRepository bankRepository;
     private final CloudinaryConfig cloudinaryConfig;
     private static final String VIETQR_URL = "https://api.vietqr.io/v2/generate";
+    private final InvoiceService invoiceService;
 
     public DataObjectResponse generateVietQR(int id) {
         Optional<Invoice> invoiceOpt = invoiceRepository.findById(id);
@@ -39,6 +45,10 @@ public class VietQRService {
         }
 
         Invoice invoice = invoiceOpt.get();
+        if (invoice.getStatus() == PaymentStatus.UNPAID) {
+            throw new AppException(ErrorCode.BAD_REQUEST, "Please update the invoice before generating VietQR code");
+        }
+
         Bank bank = bankRepository.findByBankStatus(true);
         if (bank == null) {
             throw new AppException(ErrorCode.NOT_FOUND, "Please create bank account first");
@@ -47,7 +57,7 @@ public class VietQRService {
         req.setAccountNo(bank.getBankAccountNo());
         req.setAccountName(bank.getBankAccountName());
         req.setAcqId(Integer.parseInt(bank.getBankBin()));
-        req.setAmount(invoice.getTotalAmount());
+        req.setAmount(invoice.getTotalAmount().setScale(0, RoundingMode.HALF_UP));
         req.setAddInfo("Payment for invoice #" + id);
 
         HttpHeaders headers = new HttpHeaders();

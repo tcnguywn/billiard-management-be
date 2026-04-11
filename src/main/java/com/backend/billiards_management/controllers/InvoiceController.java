@@ -6,6 +6,7 @@ import com.backend.billiards_management.dtos.response.ApiResponse;
 import com.backend.billiards_management.dtos.response.invoice.InvoiceRes;
 import com.backend.billiards_management.services.invoice.InvoiceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/invoices")
 public class InvoiceController {
-
+    @Autowired
     private final InvoiceService invoiceService;
 
     @PostMapping

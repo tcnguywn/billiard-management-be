@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 public class ProductRes {
     int id;
     String name;
-    BigDecimal price;
+    BigDecimal sellingPrice;
     int stock;
     String imageUrl;
     String categoryName;

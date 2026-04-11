@@ -13,7 +13,7 @@ public interface ProductService {
     ProductRes getProductById(int id);
     ProductRes upsertProduct(ProductUpsertReq req);
     void deleteProduct(int id);
-    List<ProductRes> filterProducts(String name);
+    Page<ProductRes> filterProducts(String name, Pageable pageable);
     void reduceStock(int productId, int quantity);
 
 }

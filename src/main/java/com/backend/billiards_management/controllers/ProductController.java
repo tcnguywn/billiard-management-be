@@ -91,12 +91,13 @@ public class ProductController extends BaseController{
     }
 
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse<List<ProductRes>>> searchProduct(@RequestParam String keyword) {
+    public ResponseEntity<ApiResponse<Page<ProductRes>>> searchProduct(@RequestParam String keyword,
+                                                                       @PageableDefault(page = 0, size = 10) Pageable pageable) {
         return ResponseEntity.ok(
-                ApiResponse.<List<ProductRes>>builder()
+                ApiResponse.<Page<ProductRes>>builder()
                         .status(HttpStatus.OK.value())
                         .message("search product success")
-                        .body(productService.filterProducts(keyword))
+                        .body(productService.filterProducts(keyword, pageable))
                         .build()
         );
     }

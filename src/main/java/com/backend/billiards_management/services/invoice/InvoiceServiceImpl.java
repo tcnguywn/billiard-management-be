@@ -62,27 +62,16 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,
                         "Cannot find billiard table with id: " + req.getBilliardTableId()));
 
-        // Tìm voucher nếu có
-        Voucher voucher = null;
-        if (req.getVoucherId() != 0) {
-            voucher = voucherRepository.findById((long) req.getVoucherId())
-                    .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,
-                            "Cannot find voucher with id: " + req.getVoucherId()));
-        }
-
-        // Parse payment method
-        PaymentMethod paymentMethod = parsePaymentMethod(req.getPaymentMethod());
-
         Invoice invoice = Invoice.builder()
-                .startTime(req.getStartTime())
-                .endTime(req.getEndTime())
+                .startTime(LocalDateTime.now())
+                .endTime(null)
                 .status(PaymentStatus.UNPAID)
-                .paymentMethod(paymentMethod)
-                .serviceAmount(req.getServiceAmount())
-                .productAmount(req.getProductAmount())
-                .taxAmount(req.getTaxAmount())
-                .totalAmount(req.getTotalAmount())
-                .voucher(voucher)
+                .paymentMethod(null)
+                .serviceAmount(null)
+                .productAmount(null)
+                .taxAmount(null)
+                .totalAmount(null)
+                .voucher(null)
                 .employee(employee)
                 .billiardTable(billiardTable)
                 .build();
@@ -99,6 +88,10 @@ public class InvoiceServiceImpl implements InvoiceService {
         Invoice invoice = invoiceRepository.findById(req.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,
                         "Cannot find invoice with id: " + req.getId()));
+
+        if (invoice.getStatus() == PaymentStatus.PAID) {
+            throw new AppException(ErrorCode.BAD_REQUEST, "Invoice is paid");
+        }
 
         if (invoice.isDeleted()) {
             throw new AppException(ErrorCode.NOT_FOUND, "Invoice with id " + req.getId() + " has been deleted");
@@ -128,25 +121,14 @@ public class InvoiceServiceImpl implements InvoiceService {
             invoice.setVoucher(voucher);
         }
 
-        if (req.getStartTime() != null) {
-            invoice.setStartTime(req.getStartTime());
-        }
-        if (req.getEndTime() != null) {
-            invoice.setEndTime(req.getEndTime());
-        }
-        if (req.getStatus() != null && req.getStatus().equals("PAID") && invoice.getStatus() == PaymentStatus.UNPAID) {
-            BilliardTable table = tableRepository.findById(invoice.getBilliardTable().getId())
-                    .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,
-                            "Cannot find billiard table with id: " + invoice.getBilliardTable().getId()));
-            table.setStatus(TableStatus.AVAILABLE);
-            tableRepository.save(table);
-            invoice.setStatus(parsePaymentStatus(req.getStatus()));
-        }
         if (req.getPaymentMethod() != null) {
             invoice.setPaymentMethod(parsePaymentMethod(req.getPaymentMethod()));
         }
-
-        calculateInvoiceAmounts(invoice, voucher);
+        invoice.setEndTime(LocalDateTime.now());
+        if (invoice.getStatus() == PaymentStatus.PAID)
+            calculateInvoiceAmounts(invoice, voucher);
+        BilliardTable table = invoice.getBilliardTable();
+        table.setStatus(TableStatus.AVAILABLE);
 
         Invoice updatedInvoice = invoiceRepository.save(invoice);
         return mapToRes(updatedInvoice);

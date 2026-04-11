@@ -1,0 +1,936 @@
+{
+	"info": {
+		"_postman_id": "billiard-club-api-collection",
+		"name": "Billiard Club Management API",
+		"description": "Complete API collection for Billiard Club Management System with test data",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "billiard-club-exporter"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "login"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Employees",
+			"item": [
+				{
+					"name": "Get All Employees",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/employees?page=0&size=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "employees"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Employee Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/employees/profile",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "employees", "profile"]
+						}
+					}
+				},
+				{
+					"name": "Create Employee",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"employee2\",\n    \"password\": \"password123\",\n    \"name\": \"Nguyen Van B\",\n    \"phone\": \"0987654321\",\n    \"email\": \"employee2@example.com\",\n    \"address\": \"456 Secondary St\",\n    \"roleId\": 2\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/employees",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "employees"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Tables",
+			"item": [
+				{
+					"name": "Get All Tables",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/tables?page=0&size=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "tables"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Tables Dashboard",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/tables/dashboard?page=0&size=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "tables", "dashboard"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Table",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Table 1",
+									"type": "text"
+								},
+								{
+									"key": "tableNumber",
+									"value": "A1",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Premium table",
+									"type": "text"
+								},
+								{
+									"key": "status",
+									"value": "AVAILABLE",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/tables",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "tables"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Invoices",
+			"item": [
+				{
+					"name": "Get All Invoices",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/invoices",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "invoices"]
+						}
+					}
+				},
+				{
+					"name": "Get Invoices by Status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/invoices/status/UNPAID",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "invoices", "status", "UNPAID"]
+						}
+					}
+				},
+				{
+					"name": "Create Invoice",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"employeeId\": 1,\n    \"billiardTableId\": 1,\n    \"startTime\": \"2026-04-10T10:00:00\",\n    \"paymentMethod\": \"QR_CODE\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/invoices",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "invoices"]
+						}
+					}
+				},
+				{
+					"name": "Confirm Invoice Payment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/invoices/{{invoiceId}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "invoices", "{{invoiceId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Order Details",
+			"item": [
+				{
+					"name": "Add Order Detail",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"invoiceId\": {{invoiceId}},\n    \"productId\": 1,\n    \"quantity\": 2,\n    \"price\": 25000,\n    \"note\": \"Extra ice\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/order-details",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "order-details"]
+						}
+					}
+				},
+				{
+					"name": "Update Order Detail",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": {{orderDetailId}},\n    \"quantity\": 3,\n    \"note\": \"No ice\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/order-details",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "order-details"]
+						}
+					}
+				},
+				{
+					"name": "Delete Order Detail",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/order-details/{{orderDetailId}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "order-details", "{{orderDetailId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "Get All Products",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/products?page=0&size=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "products"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Products",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/products/search?keyword=Coca",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "products", "search"],
+							"query": [
+								{
+									"key": "keyword",
+									"value": "Coca"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Coca Cola 330ml",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Refreshing soft drink",
+									"type": "text"
+								},
+								{
+									"key": "importPrice",
+									"value": "15000",
+									"type": "text"
+								},
+								{
+									"key": "sellingPrice",
+									"value": "25000",
+									"type": "text"
+								},
+								{
+									"key": "stock",
+									"value": "100",
+									"type": "text"
+								},
+								{
+									"key": "unit",
+									"value": "bottle",
+									"type": "text"
+								},
+								{
+									"key": "categoryId",
+									"value": "1",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/products",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "products"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Categories",
+			"item": [
+				{
+					"name": "Get All Categories",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/categories",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "categories"]
+						}
+					}
+				},
+				{
+					"name": "Create Category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Drinks\",\n    \"description\": \"Beverages and soft drinks\",\n    \"type\": \"RETAIL\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/categories",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "categories"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Vouchers",
+			"item": [
+				{
+					"name": "Get All Active Vouchers",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/vouchers",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "vouchers"]
+						}
+					}
+				},
+				{
+					"name": "Validate Vouchers",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/vouchers/validate_vouchers?totalBillAmount=200000",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "vouchers", "validate_vouchers"],
+							"query": [
+								{
+									"key": "totalBillAmount",
+									"value": "200000"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Voucher",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"SAVE10\",\n    \"description\": \"Save 10% on your bill\",\n    \"discountType\": \"PERCENTAGE\",\n    \"discountValue\": 10,\n    \"minimumAmount\": 100000,\n    \"maximumDiscount\": 50000,\n    \"quantity\": 100,\n    \"startDate\": \"2026-01-01T00:00:00\",\n    \"endDate\": \"2026-12-31T23:59:59\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/vouchers",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "vouchers"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Price Lists",
+			"item": [
+				{
+					"name": "Get All Price Lists",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/pricelists",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "pricelists"]
+						}
+					}
+				},
+				{
+					"name": "Create Price List",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Standard Price\",\n    \"description\": \"Regular pricing for standard tables\",\n    \"pricePerHour\": 100000\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/pricelists",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "pricelists"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Banks",
+			"item": [
+				{
+					"name": "Get All Banks",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/banks",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "banks"]
+						}
+					}
+				},
+				{
+					"name": "Get Active Bank",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/banks/active",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "banks", "active"]
+						}
+					}
+				},
+				{
+					"name": "Create Bank",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"bankBin\": \"970436\",\n    \"bankAccountNo\": \"1234567890\",\n    \"bankAccountName\": \"NGUYEN VAN A\",\n    \"bankStatus\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/banks",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "banks"]
+						}
+					}
+				},
+				{
+					"name": "Get VietQR",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/banks/vietqr/{{bankId}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "banks", "vietqr", "{{bankId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Purchase Invoices",
+			"item": [
+				{
+					"name": "Get All Purchase Invoices",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/purchase-invoices?page=0&size=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "purchase-invoices"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Purchase Invoice",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"details\": [\n        {\n            \"productId\": 1,\n            \"quantity\": 10,\n            \"price\": 15000\n        },\n        {\n            \"productId\": 2,\n            \"quantity\": 5,\n            \"price\": 20000\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/purchase-invoices",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "purchase-invoices"]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:9090",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "invoiceId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "orderDetailId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "bankId",
+			"value": "1",
+			"type": "string"
+		}
+	]
+}

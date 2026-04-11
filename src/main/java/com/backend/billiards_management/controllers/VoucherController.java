@@ -19,7 +19,7 @@ import java.util.List;
 public class VoucherController {
     private final VoucherService voucherService;
 
-    @GetMapping("/")
+    @GetMapping("")
     public ResponseEntity<ApiResponse<List<VoucherResponse>>> getActiveVouchers() {
         return ResponseEntity.ok(
                 ApiResponse.<List<VoucherResponse>>builder()
@@ -30,7 +30,7 @@ public class VoucherController {
     }
 
     @GetMapping("/{voucherId}")
-    public ResponseEntity<ApiResponse<VoucherResponse>> getVoucherById(@RequestParam Long voucherId) {
+    public ResponseEntity<ApiResponse<VoucherResponse>> getVoucherById(@PathVariable Long voucherId) {
         return ResponseEntity.ok(
                 ApiResponse.<VoucherResponse>builder()
                         .status(200)
@@ -39,7 +39,7 @@ public class VoucherController {
                         .build());
     }
 
-    @PostMapping("/")
+    @PostMapping("")
     public ResponseEntity<ApiResponse<VoucherResponse>> createVoucher(@RequestBody CreateVoucherRequest request) {
         return ResponseEntity.ok(
                 ApiResponse.<VoucherResponse>builder()
@@ -51,7 +51,7 @@ public class VoucherController {
     }
 
     @PatchMapping("/{voucherId}")
-    public ResponseEntity<ApiResponse<VoucherResponse>> updateVoucher(@RequestParam Long voucherId,
+    public ResponseEntity<ApiResponse<VoucherResponse>> updateVoucher(@PathVariable Long voucherId,
                                                                       @RequestBody UpdateVoucherRequest request) {
         return ResponseEntity.ok(
                 ApiResponse.<VoucherResponse>builder()
@@ -74,7 +74,7 @@ public class VoucherController {
     }
 
     @DeleteMapping("/{voucherId}")
-    public ResponseEntity<ApiResponse<String>> deleteVoucher(@RequestParam Long voucherId) {
+    public ResponseEntity<ApiResponse<String>> deleteVoucher(@PathVariable Long voucherId) {
         voucherService.deleteVoucher(voucherId);
         return ResponseEntity.ok(
                 ApiResponse.<String>builder()

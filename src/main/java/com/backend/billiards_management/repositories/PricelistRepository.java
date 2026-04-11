@@ -10,6 +10,5 @@ import java.util.List;
 
 @Repository
 public interface PricelistRepository extends JpaRepository<PriceList, Integer> {
-    PriceList findByPricelistName(String pricelistName);
     List<PriceList> findByTableType(TableType tableType);
 }

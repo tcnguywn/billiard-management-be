@@ -13,7 +13,6 @@ public class ProductUpsertReq {
     BigDecimal sellingPrice;
     BigDecimal importPrice;
     int initStock;
-    int imageId;
     int categoryId;
     MultipartFile image;
 }
