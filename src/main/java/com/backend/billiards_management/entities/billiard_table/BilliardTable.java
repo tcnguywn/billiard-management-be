@@ -4,8 +4,11 @@ import com.backend.billiards_management.dtos.constant.TableType;
 import com.backend.billiards_management.entities.BaseEntity;
 import com.backend.billiards_management.entities.billiard_table.enums.TableStatus;
 import com.backend.billiards_management.entities.image.UploadImage;
+import com.backend.billiards_management.entities.invoice.Invoice;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "billiard_tables")

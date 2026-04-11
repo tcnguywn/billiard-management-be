@@ -41,8 +41,24 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     public Page<ProductRes> getAllProducts(Pageable pageable) {
-        return productRepository.findAll(pageable)
-                .map(product -> modelMapperConfig.modelMapper().map(product, ProductRes.class));
+
+        Page<Product> productPage = productRepository.findAllByDeletedFalse(pageable);
+
+        return productPage.map(p -> ProductRes.builder()
+                .id(p.getId())
+                .name(p.getName())
+                .sellingPrice(p.getSellingPrice())
+                .stock(p.getStock())
+                .imageUrl(
+                        p.getImage() != null ? p.getImage().getImageUrl() : null
+                )
+                .categoryName(
+                        p.getProductCategory() != null
+                                ? p.getProductCategory().getCategoryName()
+                                : null
+                )
+                .build()
+        );
     }
 
     @Override
@@ -70,6 +86,9 @@ public class ProductServiceImpl implements ProductService{
             product.setName(req.getName());
         if (req.getSellingPrice() != null) {
             product.setSellingPrice(req.getSellingPrice());
+        }
+        if (req.getImportPrice() != null) {
+            product.setImportPrice(req.getImportPrice());
         }
         if (req.getInitStock() != 0) {
             if (product.getStock() == null) {
@@ -101,6 +120,10 @@ public class ProductServiceImpl implements ProductService{
         if(product.getImage() != null) {
             productRes.setImageUrl(product.getImage().getImageUrl());
         }
+        if (product.getProductCategory() != null) {
+            productRes.setCategoryName(product.getProductCategory().getCategoryName());
+        }
+        productRepository.save(product);
         return productRes;
     }
 
@@ -117,21 +140,15 @@ public class ProductServiceImpl implements ProductService{
 
     // Giới hạn filter by name
     @Override
-    public List<ProductRes> filterProducts(String name) {
-        List<Product> products = new ArrayList<>();
-        List<ProductRes> productRes = new ArrayList<>();
+    public Page<ProductRes> filterProducts(String name, Pageable pageable) {
+
         if (name == null || name.trim().isEmpty()) {
-            products = productRepository.findByDeletedFalse();
-            for (Product product : products) {
-                productRes.add(modelMapperConfig.modelMapper().map(product, ProductRes.class));
-            }
+            Page<Product> products = productRepository.findAllByDeletedFalse(pageable);
+            return products.map(this::toRes);
         }
 
-        products = productRepository.findByNameContainingIgnoreCaseAndDeletedFalse(name.trim());
-        for (Product product : products) {
-            productRes.add(modelMapperConfig.modelMapper().map(product, ProductRes.class));
-        }
-        return productRes;
+        Page<Product> products = productRepository.findByNameContainingIgnoreCaseAndDeletedFalse(name, pageable);
+        return products.map(this::toRes);
     }
 
     // Sử dụng cho hàm thanh toán
@@ -155,5 +172,22 @@ public class ProductServiceImpl implements ProductService{
 
     private boolean isProductExist(int id) {
         return productRepository.findByIdAndDeletedFalse(id).isPresent();
+    }
+
+    private ProductRes toRes(Product p) {
+        return ProductRes.builder()
+                .id(p.getId())
+                .name(p.getName())
+                .sellingPrice(p.getSellingPrice())
+                .stock(p.getStock())
+                .imageUrl(
+                        p.getImage() != null ? p.getImage().getImageUrl() : null
+                )
+                .categoryName(
+                        p.getProductCategory() != null
+                                ? p.getProductCategory().getCategoryName()
+                                : null
+                )
+                .build();
     }
 }

@@ -86,7 +86,8 @@ public class VoucherServiceImpl implements VoucherService{
 
         List<VoucherResponse> voucherResponses = new ArrayList<>();
         for (Voucher v : vouchers) {
-            voucherResponses.add(convertToResponse(v));
+            if (v.getEndDate().after(new java.util.Date()))
+                voucherResponses.add(convertToResponse(v));
         }
 
         return voucherResponses;

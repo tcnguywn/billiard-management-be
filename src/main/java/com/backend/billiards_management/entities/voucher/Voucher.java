@@ -33,6 +33,7 @@ public class Voucher extends BaseEntity {
     @Column(name = "source", length = 20)
     private VoucherSource source;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private VoucherStatus status;
 
