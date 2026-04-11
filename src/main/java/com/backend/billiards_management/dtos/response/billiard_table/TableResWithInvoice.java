@@ -13,5 +13,6 @@ public class TableResWithInvoice {
     private String name;
     private TableStatus status;
     private TableType tableType;
+    private String imageUrl;
     private InvoiceActiveRes activeInvoice;
 }

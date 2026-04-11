@@ -1,6 +1,7 @@
 package com.backend.billiards_management.controllers;
 
 import com.backend.billiards_management.dtos.request.auth.LoginRequest;
+import com.backend.billiards_management.dtos.request.auth.RefreshTokenRequest;
 import com.backend.billiards_management.dtos.response.ApiResponse;
 import com.backend.billiards_management.dtos.response.auth.AuthResponse;
 import com.backend.billiards_management.services.keycloak.KeycloakUserService;
@@ -28,6 +29,19 @@ public class AuthController {
                 ApiResponse.<AuthResponse>builder()
                         .status(HttpStatus.OK.value())
                         .message("Login success")
+                        .body(authResponse)
+                        .build()
+        );
+    }
+    @PostMapping("/auth/refresh")
+    public ResponseEntity<ApiResponse<AuthResponse>> refresh(@RequestBody RefreshTokenRequest request) {
+
+        AuthResponse authResponse = keycloakUserService.refreshToken(request);
+
+        return ResponseEntity.ok(
+                ApiResponse.<AuthResponse>builder()
+                        .status(HttpStatus.OK.value())
+                        .message("Refresh token success")
                         .body(authResponse)
                         .build()
         );

@@ -1,6 +1,7 @@
 package com.backend.billiards_management.services.keycloak;
 
 import com.backend.billiards_management.dtos.request.auth.LoginRequest;
+import com.backend.billiards_management.dtos.request.auth.RefreshTokenRequest;
 import com.backend.billiards_management.dtos.response.auth.AuthResponse;
 import com.backend.billiards_management.dtos.response.auth.KeycloakTokenResponse;
 import com.backend.billiards_management.dtos.response.employee.EmployeeRes;
@@ -133,6 +134,51 @@ public class KeycloakUserService {
             throw new AppException(
                     ErrorCode.BAD_REQUEST,
                     "Login failed"
+            );
+        }
+    }
+    public AuthResponse refreshToken(RefreshTokenRequest request) {
+
+        String tokenUrl = authServerUrl + "/realms/" + realm + "/protocol/openid-connect/token";
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("client_id", clientId);
+        body.add("grant_type", "refresh_token");
+        body.add("refresh_token", request.getRefreshToken());
+
+        // nếu client có secret thì thêm:
+        // body.add("client_secret", clientSecret);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        HttpEntity<MultiValueMap<String, String>> entity =
+                new HttpEntity<>(body, headers);
+
+        try {
+
+            ResponseEntity<KeycloakTokenResponse> response =
+                    restTemplate.exchange(
+                            tokenUrl,
+                            HttpMethod.POST,
+                            entity,
+                            KeycloakTokenResponse.class
+                    );
+
+            return mapToAuthResponse(response.getBody());
+
+        } catch (HttpClientErrorException.Unauthorized ex) {
+
+            throw new AppException(
+                    ErrorCode.UNAUTHORIZED,
+                    "Refresh token expired or invalid"
+            );
+
+        } catch (HttpClientErrorException ex) {
+
+            throw new AppException(
+                    ErrorCode.BAD_REQUEST,
+                    "Refresh token failed"
             );
         }
     }

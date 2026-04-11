@@ -45,7 +45,18 @@ public class PriceListServiceImpl implements PriceListService {
     public PricelistRes updatePriceList(UpdatePricelistReq req) {
         PriceList priceList = pricelistRepository.findById(req.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Cannot find price list with id: " + req.getId()));
-        modelMapper.map(req, priceList);
+        if(req.getStartTime() != null) {
+            priceList.setStartTime(req.getStartTime());
+        }
+        if(req.getEndTime() != null) {
+            priceList.setEndTime(req.getEndTime());
+        }
+        if(req.getUnitPrice() != null) {
+            priceList.setUnitPrice(req.getUnitPrice());
+        }
+        if(req.getTableType() != null) {
+            priceList.setTableType(req.getTableType());
+        }
         return modelMapper.map(pricelistRepository.save(priceList), PricelistRes.class);
     }
 

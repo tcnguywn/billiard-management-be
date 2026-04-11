@@ -48,7 +48,13 @@ public class TableServiceImpl implements TableService {
 
         return tables.map(table -> {
             TableRes res = modelMapper.map(table, TableRes.class);
-            res.setImageUrl(table.getUploadImage().getImageUrl()); // set thêm nếu cần override
+
+            if (table.getUploadImage() != null) {
+                res.setImageUrl(table.getUploadImage().getImageUrl());
+            } else {
+                res.setImageUrl(null);
+            }
+
             return res;
         });
     }
@@ -63,6 +69,7 @@ public class TableServiceImpl implements TableService {
             res.setName(table.getName());
             res.setStatus(table.getStatus());
             res.setTableType(table.getTableType());
+            res.setImageUrl(table.getUploadImage() != null ? table.getUploadImage().getImageUrl() : null);
 
             // Tìm hoá đơn hoạt động (chưa thanh toán) của bàn
             Invoice activeInvoice = invoiceRepository.findByStatusAndDeletedFalse(PaymentStatus.UNPAID)

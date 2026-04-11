@@ -64,9 +64,9 @@ public class PricelistController extends BaseController {
         );
     }
 
-    @DeleteMapping
-    public ResponseEntity<ApiResponse<String>> deletePriceList(@RequestParam Integer priceListId) {
-        priceListService.deletePriceList(priceListId);
+    @DeleteMapping("/{pricelistId}")
+    public ResponseEntity<ApiResponse<String>> deletePriceList(@PathVariable("pricelistId") Integer pricelistId) {
+        priceListService.deletePriceList(pricelistId);
         return ResponseEntity.ok(
                 ApiResponse.<String>builder()
                         .status(HttpStatus.OK.value())

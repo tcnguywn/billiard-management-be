@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Date;
 
 @Entity
@@ -17,13 +19,11 @@ import java.util.Date;
 @Builder
 public class PriceList extends BaseEntity {
 
-    @Temporal(TemporalType.TIME)
     @Column(name = "start_time")
-    private Date startTime;
+    private LocalTime startTime;
 
-    @Temporal(TemporalType.TIME)
     @Column(name = "end_time")
-    private Date endTime;
+    private LocalTime endTime;
 
     @Column(name = "unit_price", precision = 10, scale = 2)
     private BigDecimal unitPrice;
