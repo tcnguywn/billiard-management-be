@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -95,12 +96,32 @@ public class PurchaseInvoiceServiceImpl implements PurchaseInvoiceService {
     }
 
     @Override
+    public List<PurchaseInvoiceRes> searchByDateRange(LocalDate startDate, LocalDate endDate) {
+        LocalDateTime start = startDate.atStartOfDay();
+        LocalDateTime end = endDate.atTime(23, 59, 59);
+
+        return purchaseInvoiceRepository.findByImportDateBetween(start, end)
+                .stream()
+                .map(invoice -> PurchaseInvoiceRes.builder()
+                        .purchaseId(invoice.getId())
+                        .totalPrice(invoice.getTotalAmount())
+                        .purchaseDate(invoice.getImportDate())
+                        .employeeName(invoice.getEmployee().getLastName() + " " + invoice.getEmployee().getFirstName())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+
+
+
+    @Override
     public Page<PurchaseInvoiceRes> getAllPurchaseInvoices(Pageable pageable) {
         return purchaseInvoiceRepository.findAll(pageable)
                 .map(invoice -> PurchaseInvoiceRes.builder()
                         .purchaseId(invoice.getId())
                         .totalPrice(invoice.getTotalAmount())
                         .purchaseDate(invoice.getImportDate())
+                        .employeeName(invoice.getEmployee().getLastName() + " " + invoice.getEmployee().getFirstName())
                         .build());
     }
 

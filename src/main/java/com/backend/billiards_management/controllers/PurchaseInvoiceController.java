@@ -9,9 +9,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/purchase-invoices")
@@ -53,6 +58,22 @@ public class PurchaseInvoiceController {
                         .build()
         );
     }
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<PurchaseInvoiceRes>>> searchByDateRange(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        List<PurchaseInvoiceRes> result = purchaseInvoiceService.searchByDateRange(startDate, endDate);
+        return ResponseEntity.ok(
+                ApiResponse.<List<PurchaseInvoiceRes>>builder()
+                        .status(HttpStatus.OK.value())
+                        .message("Search purchase invoices by date range success")
+                        .body(result)
+                        .build()
+        );
+    }
+
+
+
 
     @DeleteMapping()
     public ResponseEntity<ApiResponse<String>> deletePurchaseInvoice(@RequestParam int invoiceId) {

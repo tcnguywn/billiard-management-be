@@ -12,4 +12,5 @@ public class PurchaseInvoiceRes {
     private int purchaseId;
     private BigDecimal totalPrice;
     private LocalDateTime purchaseDate;
+    private String employeeName;
 }
