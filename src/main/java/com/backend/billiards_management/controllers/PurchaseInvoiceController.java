@@ -3,6 +3,7 @@ package com.backend.billiards_management.controllers;
 import com.backend.billiards_management.dtos.request.purchase_invoice.PurchaseInvoiceReq;
 import com.backend.billiards_management.dtos.response.ApiResponse;
 import com.backend.billiards_management.dtos.response.purchase.PurchaseInvoiceRes;
+import com.backend.billiards_management.dtos.response.purchase.PurchaseInvoiceResDetail;
 import com.backend.billiards_management.services.purchase_invoice.PurchaseInvoiceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,9 +21,9 @@ public class PurchaseInvoiceController {
     private final PurchaseInvoiceService purchaseInvoiceService;
 
     @PostMapping()
-    public ResponseEntity<ApiResponse<PurchaseInvoiceRes>> createPurchaseInvoice(@RequestBody PurchaseInvoiceReq req) {
+    public ResponseEntity<ApiResponse<PurchaseInvoiceResDetail>> createPurchaseInvoice(@RequestBody PurchaseInvoiceReq req) {
         return ResponseEntity.ok(
-                ApiResponse.<PurchaseInvoiceRes>builder()
+                ApiResponse.<PurchaseInvoiceResDetail>builder()
                         .status(HttpStatus.OK.value())
                         .message("Create purchase invoice success")
                         .body(purchaseInvoiceService.createPurchaseInvoice(req))
@@ -31,9 +32,9 @@ public class PurchaseInvoiceController {
     }
 
     @GetMapping("/{invoiceId}")
-    public ResponseEntity<ApiResponse<PurchaseInvoiceRes>> getPurchaseInvoiceById(@PathVariable int invoiceId) {
+    public ResponseEntity<ApiResponse<PurchaseInvoiceResDetail>> getPurchaseInvoiceById(@PathVariable int invoiceId) {
         return ResponseEntity.ok(
-                ApiResponse.<PurchaseInvoiceRes>builder()
+                ApiResponse.<PurchaseInvoiceResDetail>builder()
                         .status(HttpStatus.OK.value())
                         .message("Get purchase invoice success")
                         .body(purchaseInvoiceService.getPurchaseInvoiceById(invoiceId))

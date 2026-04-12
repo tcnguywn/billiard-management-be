@@ -4,6 +4,7 @@ import com.backend.billiards_management.dtos.request.purchase_invoice.PurchaseDe
 import com.backend.billiards_management.dtos.request.purchase_invoice.PurchaseInvoiceReq;
 import com.backend.billiards_management.dtos.response.purchase.PurchaseDetailRes;
 import com.backend.billiards_management.dtos.response.purchase.PurchaseInvoiceRes;
+import com.backend.billiards_management.dtos.response.purchase.PurchaseInvoiceResDetail;
 import com.backend.billiards_management.entities.employee.Employee;
 import com.backend.billiards_management.entities.product.Product;
 import com.backend.billiards_management.entities.purchase_detail.PurchaseDetail;
@@ -36,7 +37,7 @@ public class PurchaseInvoiceServiceImpl implements PurchaseInvoiceService {
     private final ProductRepository productRepository;
     private final EmployeeService  employeeService;
     @Override
-    public PurchaseInvoiceRes createPurchaseInvoice(PurchaseInvoiceReq req) {
+    public PurchaseInvoiceResDetail createPurchaseInvoice(PurchaseInvoiceReq req) {
         Employee employee = employeeRepository.findById(employeeService.getMyProfile().getId())
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Cannot find employee"));
 
@@ -78,7 +79,7 @@ public class PurchaseInvoiceServiceImpl implements PurchaseInvoiceService {
     }
 
     @Override
-    public PurchaseInvoiceRes getPurchaseInvoiceById(int id) {
+    public PurchaseInvoiceResDetail getPurchaseInvoiceById(int id) {
         PurchaseInvoice invoice = purchaseInvoiceRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Cannot find purchase invoice with id: " + id));
 
@@ -96,10 +97,15 @@ public class PurchaseInvoiceServiceImpl implements PurchaseInvoiceService {
     @Override
     public Page<PurchaseInvoiceRes> getAllPurchaseInvoices(Pageable pageable) {
         return purchaseInvoiceRepository.findAll(pageable)
-                .map(this::mapToResponse);
+                .map(invoice -> PurchaseInvoiceRes.builder()
+                        .purchaseId(invoice.getId())
+                        .totalPrice(invoice.getTotalAmount())
+                        .purchaseDate(invoice.getImportDate())
+                        .build());
     }
 
-    private PurchaseInvoiceRes mapToResponse(PurchaseInvoice invoice) {
+
+    private PurchaseInvoiceResDetail mapToResponse(PurchaseInvoice invoice) {
         List<PurchaseDetailRes> detailResponses = invoice.getPurchaseDetails().stream()
                 .map(detail -> PurchaseDetailRes.builder()
                         .id(detail.getId())
@@ -113,7 +119,7 @@ public class PurchaseInvoiceServiceImpl implements PurchaseInvoiceService {
 
         String employeeName = invoice.getEmployee().getLastName() + " " + invoice.getEmployee().getFirstName();
 
-        return PurchaseInvoiceRes.builder()
+        return PurchaseInvoiceResDetail.builder()
                 .id(invoice.getId())
                 .totalAmount(invoice.getTotalAmount())
                 .importDate(invoice.getImportDate())

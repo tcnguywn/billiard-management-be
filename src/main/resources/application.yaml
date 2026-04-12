@@ -14,7 +14,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/billiard_db
     username: postgres
-    password: 123456
+    password: root
     driver-class-name: org.postgresql.Driver
   #HIBERNATE
   jpa:
@@ -31,7 +31,8 @@ spring:
 server:
   port: 9090
 
-
+forecast-client:
+  base-url: http://localhost:8000/api/v1
 
 keycloak:
   realm: billiard-management
