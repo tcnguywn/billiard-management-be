@@ -132,6 +132,7 @@ public class PurchaseInvoiceServiceImpl implements PurchaseInvoiceService {
                         .id(detail.getId())
                         .productId(detail.getProduct().getId())
                         .productName(detail.getProduct().getName())
+                        .imageUrl(detail.getProduct().getImage() != null ? detail.getProduct().getImage().getImageUrl() : null)
                         .quantity(detail.getQuantity())
                         .importPrice(detail.getImportPrice())
                         .subTotal(detail.getImportPrice().multiply(BigDecimal.valueOf(detail.getQuantity())))

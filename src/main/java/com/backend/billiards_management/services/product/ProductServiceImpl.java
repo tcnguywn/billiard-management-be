@@ -48,7 +48,7 @@ public class ProductServiceImpl implements ProductService{
                 .id(p.getId())
                 .name(p.getName())
                 .sellingPrice(p.getSellingPrice())
-                .stock(p.getStock())
+                .stock(p.getStock() != null ? p.getStock() : 0)
                 .imageUrl(
                         p.getImage() != null ? p.getImage().getImageUrl() : null
                 )
@@ -116,6 +116,7 @@ public class ProductServiceImpl implements ProductService{
                             "Cannot find image with id: " + finalProduct.getImage().getId()));
             product.setImage(existingImage);
         }
+        productRepository.save(product);
         ProductRes productRes = modelMapper.map(product, ProductRes.class);
         if(product.getImage() != null) {
             productRes.setImageUrl(product.getImage().getImageUrl());
@@ -123,7 +124,7 @@ public class ProductServiceImpl implements ProductService{
         if (product.getProductCategory() != null) {
             productRes.setCategoryName(product.getProductCategory().getCategoryName());
         }
-        productRepository.save(product);
+//        productRepository.save(product);
         return productRes;
     }
 

@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -36,14 +37,20 @@ public class Voucher extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private VoucherStatus status;
+//
+//    @Temporal(TemporalType.TIMESTAMP)
+//    @Column(name = "start_date")
+//    private Date startDate;
+//
+//    @Temporal(TemporalType.TIMESTAMP)
+//    @Column(name = "end_date")
+//    private Date endDate;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "start_date")
-    private Date startDate;
+    private LocalDateTime startDate;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "end_date")
-    private Date endDate;
+    private LocalDateTime endDate;
 
     @Column(name = "quantity")
     private Integer quantity;

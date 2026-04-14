@@ -15,6 +15,8 @@ public class PurchaseDetailReq {
     @Min(value = 1, message = "Số lượng nhập phải lớn hơn 0")
     private Integer quantity;
 
+
+
     @NotNull(message = "Giá nhập không được để trống")
     @Min(value = 0, message = "Giá nhập không được âm")
     private BigDecimal importPrice;

@@ -143,6 +143,9 @@ public class InvoiceServiceImpl implements InvoiceService {
             throw new AppException(ErrorCode.NOT_FOUND, "Invoice with id " + id + " has been deleted");
         }
 
+        invoice.setEndTime(LocalDateTime.now());
+        calculateInvoiceAmounts(invoice, null);
+
         return mapToRes(invoice);
     }
 
@@ -167,6 +170,10 @@ public class InvoiceServiceImpl implements InvoiceService {
         if (invoice.isDeleted()) {
             throw new AppException(ErrorCode.NOT_FOUND, "Invoice with id " + id + " has already been deleted");
         }
+        // Nhả bàn
+        BilliardTable table = invoice.getBilliardTable();
+        table.setStatus(TableStatus.AVAILABLE);
+        tableRepository.save(table);
 
         invoice.setDeleted(true);
         for (OrderDetail detail : invoice.getOrderDetails()) {
@@ -289,6 +296,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                         .productName(product != null ? product.getName() : null)
                         .price(d.getPrice())
                         .quantity(d.getQuantity())
+                        .productImageUrl(product.getImage().getImageUrl() != null ? product.getImage().getImageUrl() : "")
                         .note(d.getNote())
                         .startTime(d.getStartTime())
                         .endTime(d.getEndTime())

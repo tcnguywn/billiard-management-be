@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
@@ -14,7 +15,7 @@ import java.util.Date;
 @AllArgsConstructor
 public class UpdateVoucherRequest {
     String status;
-    Date startTime;
-    Date endTime;
+    LocalDateTime startTime;
+    LocalDateTime endTime;
     Integer quantity;
 }

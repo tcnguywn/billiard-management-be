@@ -19,10 +19,11 @@ public class PurchaseDetailRes {
 
     private String productName;
 
+    private String imageUrl;
+
     private Integer quantity;
 
     private BigDecimal importPrice;
-
     // Tổng tiền của dòng này = quantity * importPrice (backend tính sẵn cho Frontend)
     private BigDecimal subTotal;
 }

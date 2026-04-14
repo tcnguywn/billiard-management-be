@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
@@ -18,8 +19,8 @@ public class VoucherResponse {
     BigDecimal value;
     String source;
     String status;
-    Date startTime;
-    Date endTime;
+    LocalDateTime startTime;
+    LocalDateTime endTime;
     Integer quantity;
     BigDecimal minimumAmount;
 }

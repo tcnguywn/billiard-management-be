@@ -16,6 +16,7 @@ public class OrderDetailRes {
 
     private Integer productId;
     private String productName;
+    private String productImageUrl;
 
     private BigDecimal price;
     private Integer quantity;

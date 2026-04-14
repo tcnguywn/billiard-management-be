@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -85,9 +86,12 @@ public class VoucherServiceImpl implements VoucherService{
         List<Voucher> vouchers = voucherRepository.findAllByStatus(VoucherStatus.ACTIVE);
 
         List<VoucherResponse> voucherResponses = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
+
         for (Voucher v : vouchers) {
-            if (v.getEndDate().after(new java.util.Date()))
+            if (v.getEndDate() != null && v.getEndDate().isAfter(now)) {
                 voucherResponses.add(convertToResponse(v));
+            }
         }
 
         return voucherResponses;
