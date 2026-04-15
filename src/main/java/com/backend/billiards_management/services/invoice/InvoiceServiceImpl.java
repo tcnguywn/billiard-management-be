@@ -19,7 +19,6 @@ import com.backend.billiards_management.entities.voucher.enums.VoucherType;
 import com.backend.billiards_management.exceptions.AppException;
 import com.backend.billiards_management.exceptions.ErrorCode;
 import com.backend.billiards_management.repositories.*;
-import com.backend.billiards_management.services.bank.VietQRService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,10 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.*;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -223,10 +220,10 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         ZoneId zone = ZoneId.systemDefault();
 
-        Date start = Date.from(startDate.atStartOfDay(zone).toInstant());
-        Date end = Date.from(endDate.atTime(LocalTime.MAX).atZone(zone).toInstant());
+        LocalDateTime start = startDate.atStartOfDay();
+        LocalDateTime end = endDate.atTime(LocalTime.MAX);
 
-        List<Invoice> invoices = invoiceRepository.findByDeletedFalseAndCreatedAtBetween(start, end);
+        List<Invoice> invoices = invoiceRepository.findByDeletedFalseAndStartTimeBetween(start, end);
         List<InvoiceRes> invoiceResList = new ArrayList<>();
         for (Invoice invoice : invoices) {
             invoiceResList.add(mapToRes(invoice));

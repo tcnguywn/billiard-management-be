@@ -21,14 +21,14 @@ public interface DashboardRepository extends JpaRepository<Invoice, Long> {
             WITH revenue AS (
                 SELECT
                     COALESCE(SUM(total_amount) FILTER (
-                        WHERE created_at >= date_trunc('day', CURRENT_TIMESTAMP)
-                          AND created_at < date_trunc('day', CURRENT_TIMESTAMP) + INTERVAL '1 day'
+                        WHERE start_time >= date_trunc('day', CURRENT_TIMESTAMP)
+                          AND start_time < date_trunc('day', CURRENT_TIMESTAMP) + INTERVAL '1 day'
                           AND status = 'PAID'
                     ), 0) AS today_revenue,
         
                     COALESCE(SUM(total_amount) FILTER (
-                        WHERE created_at >= date_trunc('day', CURRENT_TIMESTAMP) - INTERVAL '7 day'
-                          AND created_at < date_trunc('day', CURRENT_TIMESTAMP) - INTERVAL '6 day'
+                        WHERE start_time >= date_trunc('day', CURRENT_TIMESTAMP) - INTERVAL '7 day'
+                          AND start_time < date_trunc('day', CURRENT_TIMESTAMP) - INTERVAL '6 day'
                           AND status = 'PAID'
                     ), 0) AS last_week_revenue
                 FROM invoices
@@ -75,15 +75,15 @@ RevenueSummary getRevenueSummary();
                     SELECT SUM(total_amount) AS revenue
                     FROM invoices
                     WHERE status = 'PAID'
-                      AND created_at >= date_trunc('week', CURRENT_DATE)
-                      AND created_at < date_trunc('week', CURRENT_DATE) + INTERVAL '1 week'
+                      AND start_time >= date_trunc('week', CURRENT_DATE)
+                      AND start_time < date_trunc('week', CURRENT_DATE) + INTERVAL '1 week'
                 ),
                 last_week AS (
                     SELECT SUM(total_amount) AS revenue
                     FROM invoices
                     WHERE status = 'PAID'
-                      AND created_at >= date_trunc('week', CURRENT_DATE) - INTERVAL '1 week'
-                      AND created_at < date_trunc('week', CURRENT_DATE)
+                      AND start_time >= date_trunc('week', CURRENT_DATE) - INTERVAL '1 week'
+                      AND start_time < date_trunc('week', CURRENT_DATE)
                 )
                 SELECT
                     CASE
@@ -108,14 +108,14 @@ RevenueSummary getRevenueSummary();
 
 
     @Query(value = """
-            SELECT TO_CHAR(DATE(created_at), 'YYYY-MM-DD') AS "dateLabel",
+            SELECT TO_CHAR(DATE(start_time), 'YYYY-MM-DD') AS "dateLabel",
                    SUM(total_amount) AS revenue
             FROM invoices
             WHERE status = 'PAID'
-              AND created_at >= :from
-              AND created_at < :to
-            GROUP BY DATE(created_at)
-            ORDER BY DATE(created_at)
+              AND start_time >= :from
+              AND start_time < :to
+            GROUP BY DATE(start_time)
+            ORDER BY DATE(start_time)
             """, nativeQuery = true)
     List<RevenueData> getWeeklyRevenue(
             @Param("from") LocalDate from,
@@ -123,14 +123,14 @@ RevenueSummary getRevenueSummary();
     );
 
     @Query(value = """
-            SELECT ('Week ' || (((EXTRACT(DAY FROM created_at) - 1) / 7)::int + 1)) AS "dateLabel",
+            SELECT ('Week ' || (((EXTRACT(DAY FROM start_time) - 1) / 7)::int + 1)) AS "dateLabel",
                     SUM(total_amount) AS revenue
             FROM invoices
             WHERE status = 'PAID'
-              AND created_at >= :from
-              AND created_at < :to
+              AND start_time >= :from
+              AND start_time < :to
             GROUP BY "dateLabel"
-            ORDER BY MIN(created_at)
+            ORDER BY MIN(start_time)
             """, nativeQuery = true)
     List<RevenueData> getMonthlyRevenue(
             @Param("from") LocalDate from,
@@ -138,14 +138,14 @@ RevenueSummary getRevenueSummary();
     );
 
     @Query(value = """
-            SELECT ('Month ' || EXTRACT(MONTH FROM created_at)) AS "dateLabel",
+            SELECT ('Month ' || EXTRACT(MONTH FROM start_time)) AS "dateLabel",
                     SUM(total_amount) AS revenue
             FROM invoices
             WHERE status = 'PAID'
-              AND created_at >= :from
-              AND created_at < :to
+              AND start_time >= :from
+              AND start_time < :to
             GROUP BY "dateLabel"
-            ORDER BY MIN(created_at)
+            ORDER BY MIN(start_time)
             """, nativeQuery = true)
     List<RevenueData> getYearlyRevenue(
             @Param("from") LocalDate from,
